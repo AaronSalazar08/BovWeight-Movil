@@ -1,0 +1,7 @@
+{
+  "name": "bovweight-movil",
+  "integrations": {
+    "capacitor": {}
+  },
+  "type": "vue-vite"
+}
