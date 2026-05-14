@@ -30,3 +30,12 @@ npm-debug.log*
 /platforms
 /plugins
 /www
+/node_modules
+/typings
+/typings/main
+/typings/main.d.ts
+/typings/modules
+/typings/modules.d.ts
+/typings/globals
+/typings/globals.d.ts
+/.env.production
