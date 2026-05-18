@@ -1,0 +1,562 @@
+<script setup lang="ts">
+
+import {
+  IonPage,
+  IonHeader,
+  IonToolbar,
+  IonTitle,
+  IonContent,
+  IonSearchbar,
+  IonList,
+  IonItem,
+  IonLabel,
+  IonButton,
+  IonIcon,
+  IonFab,
+  IonFabButton,
+  IonModal,
+  IonInput,
+  alertController,
+  actionSheetController,
+} from '@ionic/vue'
+
+import {
+  homeOutline,
+  addOutline,
+  ellipsisVertical,
+} from 'ionicons/icons'
+
+import {
+  onMounted,
+  ref,
+  computed,
+  reactive,
+} from 'vue'
+
+import { useRouter } from 'vue-router'
+
+import {
+  getFincas,
+  createFinca,
+  updateFinca,
+  deleteFinca,
+  type Finca,
+} from '@/api/fincas'
+
+import { useAuthStore } from '@/stores/auth'
+
+const router = useRouter()
+
+const authStore = useAuthStore()
+
+const fincas = ref<Finca[]>([])
+
+const search = ref('')
+
+const loading = ref(false)
+
+const loadError = ref('')
+
+const showModal = ref(false)
+
+const editMode = ref(false)
+
+const fincaActual = ref<Finca | null>(null)
+
+const form = reactive({
+  usuario_id: 0,
+  nombre: '',
+  ubicacion: '',
+  area: 0,
+  numero_finca: '',
+})
+
+const loadFincas = async () => {
+
+  loading.value = true
+  loadError.value = ''
+
+  try {
+
+    fincas.value = await getFincas()
+
+  } catch (error) {
+
+    console.error(error)
+
+    loadError.value = 'No fue posible cargar las fincas. Revisa el servidor.'
+
+    fincas.value = []
+
+  } finally {
+
+    loading.value = false
+
+  }
+
+}
+
+const filteredFincas = computed(() => {
+
+  return fincas.value.filter((finca) =>
+    finca.nombre.toLowerCase()
+      .includes(search.value.toLowerCase())
+  )
+
+})
+
+const hasFincas = computed(() => filteredFincas.value.length > 0)
+
+function seleccionarFinca(finca: Finca) {
+
+  console.log('Finca seleccionada:', finca)
+
+  // Futuro:
+  // router.push(`/tabs/fincas/${finca.id}`)
+
+}
+
+function openModal() {
+
+  editMode.value = false
+
+  fincaActual.value = null
+
+  form.nombre = ''
+  form.ubicacion = ''
+  form.area = 0
+  form.numero_finca = ''
+
+  showModal.value = true
+
+}
+
+function retryLoadFincas() {
+
+  loadFincas()
+
+}
+
+function closeModal() {
+
+  showModal.value = false
+
+}
+
+function editarFinca(finca: Finca) {
+
+  editMode.value = true
+
+  fincaActual.value = finca
+
+  form.nombre = finca.nombre
+  form.ubicacion = finca.ubicacion
+  form.area = finca.area
+  form.numero_finca = finca.numero_finca
+
+  showModal.value = true
+
+}
+
+async function saveFinca() {
+
+  try {
+
+    form.usuario_id = authStore.user!.id
+
+    if (editMode.value && fincaActual.value) {
+
+      await updateFinca(fincaActual.value.id, form)
+
+    } else {
+
+      await createFinca(form)
+
+    }
+
+    closeModal()
+
+    await loadFincas()
+
+  } catch (error) {
+
+    console.error(error)
+
+  }
+
+}
+
+async function eliminarFinca(id: number) {
+
+  const alert = await alertController.create({
+
+    header: 'Eliminar finca',
+
+    message: '¿Desea eliminar esta finca?',
+
+    buttons: [
+
+      {
+        text: 'Cancelar',
+        role: 'cancel',
+      },
+
+      {
+        text: 'Eliminar',
+        role: 'destructive',
+
+        handler: async () => {
+
+          try {
+
+            await deleteFinca(id)
+
+            await loadFincas()
+
+          } catch (error) {
+
+            console.error(error)
+
+          }
+
+        },
+
+      },
+
+    ],
+
+  })
+
+  await alert.present()
+
+}
+
+async function openOptions(finca: Finca) {
+
+  const actionSheet = await actionSheetController.create({
+
+    header: finca.nombre,
+
+    buttons: [
+
+      {
+        text: 'Editar',
+
+        handler: () => {
+
+          editarFinca(finca)
+
+        },
+      },
+
+      {
+        text: 'Eliminar',
+
+        role: 'destructive',
+
+        handler: () => {
+
+          eliminarFinca(finca.id)
+
+        },
+      },
+
+      {
+        text: 'Cancelar',
+        role: 'cancel',
+      },
+
+    ],
+
+  })
+
+  await actionSheet.present()
+
+}
+
+onMounted(() => {
+
+  loadFincas()
+
+})
+
+</script>
+
+<template>
+
+  <ion-page>
+
+    <ion-header>
+
+      <ion-toolbar color="primary">
+
+        <ion-title>
+          Fincas
+        </ion-title>
+
+      </ion-toolbar>
+
+    </ion-header>
+
+    <ion-content class="ion-padding">
+
+      <!-- BUSCADOR -->
+
+      <ion-searchbar
+        v-model="search"
+        placeholder="Buscar finca"
+        class="searchbar"
+      />
+
+      
+
+      <!-- LISTA -->
+
+      <div v-if="loadError" class="error-state">
+        <ion-icon :icon="homeOutline" class="empty-icon" />
+        <p>{{ loadError }}</p>
+        <ion-button size="small" @click="retryLoadFincas">
+          Reintentar
+        </ion-button>
+      </div>
+
+      <ion-list v-else-if="hasFincas">
+
+        <ion-item
+          v-for="finca in filteredFincas"
+          :key="finca.id"
+          class="finca-item"
+        >
+
+          <ion-icon
+            :icon="homeOutline"
+            slot="start"
+            class="item-icon"
+          />
+
+          <ion-label>
+            <div class="item-title">{{ finca.nombre }}</div>
+            <div class="item-meta">{{ finca.ubicacion || 'Ubicación no definida' }}</div>
+          </ion-label>
+
+          <ion-button
+            slot="end"
+            size="small"
+            color="success"
+            @click="seleccionarFinca(finca)"
+            class="select-btn"
+          >
+            Seleccionar
+          </ion-button>
+
+          <ion-button
+            slot="end"
+            fill="clear"
+            @click="openOptions(finca)"
+            aria-label="Más opciones"
+          >
+            <ion-icon :icon="ellipsisVertical" />
+          </ion-button>
+
+        </ion-item>
+
+      </ion-list>
+
+      <div v-else-if="!loading" class="empty-state">
+        <ion-icon :icon="homeOutline" class="empty-icon" />
+        <p>No se encontraron fincas.</p>
+        <p class="empty-note">Pulsa el botón + para agregar una nueva finca.</p>
+      </div>
+
+      <div v-else class="empty-state">
+        <ion-icon :icon="homeOutline" class="empty-icon" />
+        <p>Cargando fincas...</p>
+      </div>
+
+      <!-- FAB -->
+
+      <ion-fab
+        vertical="bottom"
+        horizontal="end"
+        slot="fixed"
+      >
+
+        <ion-fab-button @click="openModal">
+
+          <ion-icon :icon="addOutline" />
+
+        </ion-fab-button>
+
+      </ion-fab>
+
+      <!-- MODAL -->
+
+      <ion-modal :is-open="showModal">
+
+        <ion-header>
+
+          <ion-toolbar color="primary">
+
+            <ion-title>
+
+              {{ editMode ? 'Editar Finca' : 'Nueva Finca' }}
+
+            </ion-title>
+
+          </ion-toolbar>
+
+        </ion-header>
+
+        <ion-content class="ion-padding">
+
+          <ion-item>
+
+            <ion-label position="stacked">
+              Nombre
+            </ion-label>
+
+            <ion-input
+              v-model="form.nombre"
+            />
+
+          </ion-item>
+
+          <ion-item>
+
+            <ion-label position="stacked">
+              Ubicación
+            </ion-label>
+
+            <ion-input
+              v-model="form.ubicacion"
+            />
+
+          </ion-item>
+
+          <ion-item>
+
+            <ion-label position="stacked">
+              Área
+            </ion-label>
+
+            <ion-input
+              type="number"
+              v-model="form.area"
+            />
+
+          </ion-item>
+
+          <ion-item>
+
+            <ion-label position="stacked">
+              Número finca
+            </ion-label>
+
+            <ion-input
+              v-model="form.numero_finca"
+            />
+
+          </ion-item>
+
+          <ion-button
+            expand="block"
+            @click="saveFinca"
+          >
+
+            {{ editMode ? 'Actualizar' : 'Guardar' }}
+
+          </ion-button>
+
+          <ion-button
+            expand="block"
+            fill="outline"
+            @click="closeModal"
+          >
+
+            Cancelar
+
+          </ion-button>
+
+        </ion-content>
+
+      </ion-modal>
+
+    </ion-content>
+
+  </ion-page>
+
+</template>
+
+<style scoped>
+</style><style scoped>
+.list-header {
+  margin: 10px 0 8px;
+}
+
+.page-subtitle {
+  margin: 0;
+  color: var(--ion-color-medium);
+  font-size: 0.95rem;
+  line-height: 1.3;
+}
+
+.searchbar {
+  --padding-start: 6px;
+  --padding-end: 6px;
+  margin-bottom: 8px;
+}
+
+.finca-item {
+  margin-bottom: 12px;
+  border-radius: 12px;
+  --background: #fbfbfb;
+  box-shadow: 0 6px 18px rgba(17,17,17,0.04);
+  --padding-top: 10px;
+  --padding-bottom: 10px;
+  align-items: center;
+}
+
+.item-icon {
+  font-size: 22px;
+  color: var(--ion-color-primary-shade, #277a3a);
+}
+
+.item-title {
+  font-weight: 600;
+  font-size: 1rem;
+  margin-bottom: 2px;
+}
+
+.item-meta {
+  font-size: 0.85rem;
+  color: var(--ion-color-medium);
+}
+
+.select-btn {
+  margin-right: 6px;
+}
+
+.empty-state {
+  text-align: center;
+  padding: 28px 12px;
+  color: var(--ion-color-medium);
+}
+
+.empty-icon {
+  font-size: 40px;
+  color: var(--ion-color-primary-shade, #277a3a);
+  margin-bottom: 8px;
+}
+
+.empty-note {
+  font-size: 0.9rem;
+  margin-top: 6px;
+  color: var(--ion-color-medium);
+}
+
+ion-button {
+  --border-radius: 10px;
+}
+
+</style>
+
