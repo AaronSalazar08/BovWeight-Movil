@@ -36,11 +36,11 @@
       </div>
 
       <div class="modules-grid">
-        <div class="module-card coming-soon">
+        <button class="module-card" type="button" @click="goToFincas">
           <ion-icon :icon="businessOutline" class="module-icon" />
           <p class="module-label">Mis Fincas</p>
-          <ion-badge color="medium" class="soon-badge">Próximamente</ion-badge>
-        </div>
+          <ion-badge color="success" class="soon-badge">Gestiona tus fincas</ion-badge>
+        </button>
 
         <div class="module-card coming-soon">
           <ion-icon :icon="pawOutline" class="module-icon" />
@@ -119,6 +119,10 @@ async function handleLogout() {
 async function handleRefresh(event: CustomEvent) {
   await authStore.fetchCurrentUser()
   ;(event.target as HTMLIonRefresherElement).complete()
+}
+
+function goToFincas() {
+  router.push({ name: 'Fincas' })
 }
 </script>
 
