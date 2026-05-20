@@ -33,8 +33,6 @@ import {
   reactive,
 } from 'vue'
 
-import { useRouter } from 'vue-router'
-
 import {
   getFincas,
   createFinca,
@@ -45,7 +43,7 @@ import {
 
 import { useAuthStore } from '@/stores/auth'
 
-const router = useRouter()
+
 
 const authStore = useAuthStore()
 
@@ -194,6 +192,8 @@ async function eliminarFinca(id: number) {
 
     message: '¿Desea eliminar esta finca?',
 
+    cssClass: 'bov-alert',
+
     buttons: [
 
       {
@@ -236,6 +236,8 @@ async function openOptions(finca: Finca) {
   const actionSheet = await actionSheetController.create({
 
     header: finca.nombre,
+
+    cssClass: 'bov-action-sheet',
 
     buttons: [
 
@@ -298,7 +300,7 @@ onMounted(() => {
 
     </ion-header>
 
-    <ion-content class="ion-padding">
+    <ion-content class="ion-padding fincas-content">
 
       <!-- BUSCADOR -->
 
@@ -407,7 +409,7 @@ onMounted(() => {
 
         </ion-header>
 
-        <ion-content class="ion-padding">
+        <ion-content class="ion-padding modal-content">
 
           <ion-item>
 
@@ -488,7 +490,22 @@ onMounted(() => {
 </template>
 
 <style scoped>
+.fincas-content {
+  --background: #f0f4f8;
+}
+
+.modal-content {
+  --background: #ffffff;
+  --color: #1a1a1a;
+  --ion-item-background: #ffffff;
+}
 </style><style scoped>
+/* Fuerza fondo claro en el contenedor de la lista para que no aparezcan
+   barras negras entre los items cuando el sistema está en modo oscuro. */
+ion-list {
+  background: #f0f4f8;
+}
+
 .list-header {
   margin: 10px 0 8px;
 }
@@ -501,6 +518,11 @@ onMounted(() => {
 }
 
 .searchbar {
+  --background: #ffffff;
+  --color: #1a1a1a;
+  --icon-color: #555555;
+  --placeholder-color: #9e9e9e;
+  --border-radius: 10px;
   --padding-start: 6px;
   --padding-end: 6px;
   margin-bottom: 8px;
