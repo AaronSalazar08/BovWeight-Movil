@@ -161,7 +161,7 @@ function goToFincas() {
 
 .greeting {
   font-size: 13px;
-  color: rgba(255, 255, 255, 0.75);
+  color: rgba(255, 255, 255, 0.92);
   margin: 0 0 2px;
 }
 
