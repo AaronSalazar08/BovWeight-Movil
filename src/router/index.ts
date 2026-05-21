@@ -44,22 +44,45 @@ const routes: Array<RouteRecordRaw> = [
         path: '',
         redirect: '/tabs/home',
       },
+
+      // Home Ganadero
       {
         path: 'home',
-        name: 'Home',
-        component: () => import('@/views/home/HomePage.vue'),
+        name: 'HomeGanadero',
+        component: () => import('@/views/home/HomeGanaderoPage.vue'),
+        meta: { requiresAuth: true, roles: ['Ganadero', 'Administrador'] },
       },
+
+      // Home Veterinario
+      {
+        path: 'home-vet',
+        name: 'HomeVeterinario',
+        component: () => import('@/views/home/HomeVeterinarioPage.vue'),
+        meta: { requiresAuth: true, roles: ['Veterinario'] },
+      },
+
+      // Perfil (accesible por todos los roles)
       {
         path: 'perfil',
         name: 'Perfil',
         component: () => import('@/views/perfil/PerfilPage.vue'),
       },
+
+      // Fincas del ganadero
       {
-        path: "fincas",
-        name: "Fincas",
-        component: () => import("@/views/fincas/FincasPage.vue"),
+        path: 'fincas',
+        name: 'Fincas',
+        component: () => import('@/views/fincas/FincasPage.vue'),
+        meta: { roles: ['Ganadero', 'Administrador'] },
       },
-      
+
+      // Fincas asignadas al veterinario
+      {
+        path: 'fincas-asignadas',
+        name: 'FincasAsignadas',
+        component: () => import('@/views/fincas/FincasPage.vue'),
+        meta: { roles: ['Veterinario'] },
+      },
     ],
   },
 ]
@@ -79,16 +102,32 @@ router.beforeEach(async (to, _from, next) => {
 
   const isAuthenticated = authStore.isAuthenticated
 
+  // Redirigir a login si la ruta requiere autenticación
   if (to.meta.requiresAuth && !isAuthenticated) {
     return next({ name: 'Login' })
   }
 
+  // Redirigir al home correcto si ya está autenticado y va a una ruta de guest
   if (to.meta.requiresGuest && isAuthenticated) {
-    return next({ name: 'Home' })
+    return next(getHomeRoute(authStore))
+  }
+
+  // Redirigir al home del rol correspondiente si va a /tabs/home genérico
+  if (to.name === 'HomeGanadero' && authStore.isVeterinario) {
+    return next({ name: 'HomeVeterinario' })
+  }
+  if (to.name === 'HomeVeterinario' && !authStore.isVeterinario) {
+    return next({ name: 'HomeGanadero' })
   }
 
   next()
 })
+
+/** Devuelve la ruta de inicio correcta según el rol del usuario */
+function getHomeRoute(authStore: ReturnType<typeof useAuthStore>) {
+  if (authStore.isVeterinario) return { name: 'HomeVeterinario' }
+  return { name: 'HomeGanadero' }
+}
 
 // Escucha eventos de sesión expirada desde el interceptor de axios
 if (typeof window !== 'undefined') {

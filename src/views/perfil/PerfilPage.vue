@@ -170,13 +170,13 @@ async function handleLogout() {
 .info-list {
   margin-top: 8px;
   --color: #1a1a1a;
-  --ion-text-color: #1a1a1a;
+  --ion-text-color: #ffffff;
 }
 
 .info-list ion-item h3 {
   font-size: 15px;
   font-weight: 500;
-  color: #1a1a1a;
+  color: #ffffff;
 }
 
 .info-list ion-item p {

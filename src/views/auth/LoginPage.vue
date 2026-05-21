@@ -141,7 +141,8 @@ async function handleLogin() {
 
   try {
     await authStore.login({ correo: form.correo, contrasena: form.contrasena })
-    router.replace({ name: 'Home' })
+    const destino = authStore.isVeterinario ? { name: 'HomeVeterinario' } : { name: 'HomeGanadero' }
+    router.replace(destino)
   } catch (err: any) {
     const status = err?.response?.status
     if (status === 401 || status === 422) {

@@ -11,6 +11,8 @@ export const useAuthStore = defineStore('auth', () => {
 
   const isAuthenticated = computed(() => !!token.value && !!user.value)
   const isAdmin = computed(() => user.value?.tipo === 'Administrador')
+  const isGanadero = computed(() => user.value?.tipo === 'Ganadero')
+  const isVeterinario = computed(() => user.value?.tipo === 'Veterinario')
   const userDisplayName = computed(() => user.value?.nombre ?? '')
 
   async function login(credentials: LoginCredentials) {
@@ -55,6 +57,8 @@ export const useAuthStore = defineStore('auth', () => {
     isLoading,
     isAuthenticated,
     isAdmin,
+    isGanadero,
+    isVeterinario,
     userDisplayName,
     login,
     logout,
