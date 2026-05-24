@@ -46,6 +46,7 @@ import { useAuthStore } from '@/stores/auth'
 
 
 const authStore = useAuthStore()
+const canManageFincas = computed(() => !authStore.isVeterinario)
 
 const fincas = ref<Finca[]>([])
 
@@ -115,6 +116,7 @@ function seleccionarFinca(finca: Finca) {
 }
 
 function openModal() {
+  if (!canManageFincas.value) return
 
   editMode.value = false
 
@@ -142,6 +144,7 @@ function closeModal() {
 }
 
 function editarFinca(finca: Finca) {
+  if (!canManageFincas.value) return
 
   editMode.value = true
 
@@ -157,6 +160,7 @@ function editarFinca(finca: Finca) {
 }
 
 async function saveFinca() {
+  if (!canManageFincas.value) return
 
   try {
 
@@ -185,6 +189,7 @@ async function saveFinca() {
 }
 
 async function eliminarFinca(id: number) {
+  if (!canManageFincas.value) return
 
   const alert = await alertController.create({
 
@@ -232,6 +237,7 @@ async function eliminarFinca(id: number) {
 }
 
 async function openOptions(finca: Finca) {
+  if (!canManageFincas.value) return
 
   const actionSheet = await actionSheetController.create({
 
@@ -352,6 +358,7 @@ onMounted(() => {
           </ion-button>
 
           <ion-button
+            v-if="canManageFincas"
             slot="end"
             fill="clear"
             @click="openOptions(finca)"
@@ -378,6 +385,7 @@ onMounted(() => {
       <!-- FAB -->
 
       <ion-fab
+        v-if="canManageFincas"
         vertical="bottom"
         horizontal="end"
         slot="fixed"
