@@ -42,11 +42,11 @@
           <ion-badge color="success" class="module-badge">Gestiona tus fincas</ion-badge>
         </button>
 
-        <div class="module-card coming-soon">
+        <button class="module-card" type="button" @click="goToMiGanado">
           <ion-icon :icon="pawOutline" class="module-icon" />
           <p class="module-label">Mi Ganado</p>
-          <ion-badge color="medium" class="module-badge">Próximamente</ion-badge>
-        </div>
+          <ion-badge color="success" class="module-badge">Ver animales</ion-badge>
+        </button>
 
         <div class="module-card coming-soon">
           <ion-icon :icon="cameraOutline" class="module-icon" />
@@ -116,6 +116,10 @@ async function handleRefresh(event: CustomEvent) {
 
 function goToFincas() {
   router.push({ name: 'Fincas' })
+}
+
+function goToMiGanado() {
+  router.push({ name: 'MiGanado' })
 }
 </script>
 

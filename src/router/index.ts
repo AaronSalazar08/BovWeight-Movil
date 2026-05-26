@@ -83,6 +83,24 @@ const routes: Array<RouteRecordRaw> = [
         component: () => import('@/views/fincas/FincasPage.vue'),
         meta: { roles: ['Veterinario'] },
       },
+
+      {
+        path: 'fincas/:fincaId/animales',
+        name: 'Animales',
+        component: () => import('@/views/fincas/AnimalesPage.vue'),
+      },
+
+      {
+        path: 'mi-ganado',
+        name: 'MiGanado',
+        component: () => import('@/views/ganado/MiGanadoPage.vue'),
+      },
+
+      {
+        path: 'ganado/:animalId/historial',
+        name: 'HistorialGanado',
+        component: () => import('@/views/ganado/HistorialGanadoPage.vue'),
+      },
     ],
   },
 ]

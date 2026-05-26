@@ -39,3 +39,5 @@ npm-debug.log*
 /typings/globals
 /typings/globals.d.ts
 /.env.production
+
+/.claude

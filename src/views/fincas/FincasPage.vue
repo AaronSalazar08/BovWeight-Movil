@@ -16,6 +16,8 @@ import {
   IonFabButton,
   IonModal,
   IonInput,
+  IonButtons,
+  IonBackButton,
   alertController,
   actionSheetController,
 } from '@ionic/vue'
@@ -42,9 +44,9 @@ import {
 } from '@/api/fincas'
 
 import { useAuthStore } from '@/stores/auth'
+import { useRouter } from 'vue-router'
 
-
-
+const router = useRouter()
 const authStore = useAuthStore()
 
 const fincas = ref<Finca[]>([])
@@ -106,12 +108,7 @@ const filteredFincas = computed(() => {
 const hasFincas = computed(() => filteredFincas.value.length > 0)
 
 function seleccionarFinca(finca: Finca) {
-
-  console.log('Finca seleccionada:', finca)
-
-  // Futuro:
-  // router.push(`/tabs/fincas/${finca.id}`)
-
+  router.push(`/tabs/fincas/${finca.id}/animales`)
 }
 
 function openModal() {
@@ -291,6 +288,10 @@ onMounted(() => {
     <ion-header>
 
       <ion-toolbar color="primary">
+
+        <ion-buttons slot="start">
+          <ion-back-button default-href="/tabs/home" />
+        </ion-buttons>
 
         <ion-title>
           Fincas

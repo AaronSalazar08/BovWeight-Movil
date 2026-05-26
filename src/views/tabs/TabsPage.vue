@@ -3,8 +3,8 @@
     <ion-tabs>
       <ion-router-outlet />
 
-      <!-- Tab bar: Ganadero -->
-      <ion-tab-bar v-if="authStore.isGanadero" slot="bottom" color="primary">
+      <!-- Tab bar: Ganadero / Administrador -->
+      <ion-tab-bar v-if="authStore.isGanadero || authStore.isAdmin" slot="bottom" color="primary">
         <ion-tab-button tab="home" href="/tabs/home">
           <ion-icon :icon="homeOutline" />
           <ion-label>Inicio</ion-label>
