@@ -10,6 +10,7 @@ export interface Ganado {
   sexo: 'Macho' | 'Hembra'
   raza: string
   imagen: string | null
+  peso_kg?: number | null
   estado_salud?: { id: number; nombre: string }
   estado_comercial?: { id: number; nombre: string }
   finca?: { id: number; nombre: string }
@@ -21,8 +22,10 @@ export interface CreateGanadoPayload {
   estado_comercial_id: number
   arete: string
   nombre?: string
-  sexo: 'Macho' | 'Hembra'
+  sexo?: 'Macho' | 'Hembra'
   raza: string
+  peso_kg?: number
+  imagen?: string
 }
 
 export interface Catalogo {

@@ -20,6 +20,7 @@ import {
   IonButtons,
   IonBackButton,
   IonCheckbox,
+  IonSpinner,
   alertController,
   actionSheetController,
 } from '@ionic/vue'
@@ -31,8 +32,12 @@ import {
   documentTextOutline,
   closeOutline,
   checkboxOutline,
+  cameraOutline,
+  imagesOutline,
+  sparklesOutline,
 } from 'ionicons/icons'
 
+import { Camera, CameraResultType, CameraSource } from '@capacitor/camera'
 import { onMounted, ref, computed, reactive } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import {
@@ -47,6 +52,7 @@ import {
 } from '@/api/ganado'
 import { getFinca, getFincas, type Finca } from '@/api/fincas'
 import { exportarPDF, exportarExcel } from '@/utils/exportarGanado'
+import { estimarPesoDesdeImagen, type MLEstimacion, type MLMedidas } from '@/api/ml'
 
 const route = useRoute()
 const router = useRouter()
@@ -66,13 +72,25 @@ const animalActual = ref<Ganado | null>(null)
 const modoSeleccion = ref(false)
 const seleccionados = ref<Set<number>>(new Set())
 
+const foto = ref<string | null>(null)
+const fotoAnotada = ref<string | null>(null)
+const estimandoPeso = ref(false)
+const resultadoML = ref<MLEstimacion | null>(null)
+
 const form = reactive({
   arete: '',
   nombre: '',
   raza: '',
   finca_id: fincaId,
   estado_comercial_id: 0,
+  peso_kg: '' as string | number,
 })
+
+const RAZA_TO_BREED: Record<string, string> = {
+  Brahman: 'brahman',
+  Cebuíno: 'cebu',
+  Criollo: 'criollo',
+}
 
 const RAZAS = ['Holstein', 'Angus', 'Jersey', 'Hereford', 'Brahman', 'Simmental', 'Cebuíno', 'Criollo']
 
@@ -163,6 +181,10 @@ function abrirModal() {
   form.raza = ''
   form.finca_id = fincaId
   form.estado_comercial_id = estadosComerciales.value[0]?.id ?? 0
+  form.peso_kg = ''
+  foto.value = null
+  fotoAnotada.value = null
+  resultadoML.value = null
   showModal.value = true
 }
 
@@ -174,30 +196,98 @@ function editarAnimal(animal: Ganado) {
   form.raza = animal.raza
   form.finca_id = animal.finca_id
   form.estado_comercial_id = animal.estado_comercial_id
+  form.peso_kg = animal.peso_kg ?? ''
+  foto.value = animal.imagen ?? null
+  resultadoML.value = null
   showModal.value = true
+}
+
+async function tomarFotoDesde(source: CameraSource) {
+  try {
+    const photo = await Camera.getPhoto({
+      resultType: CameraResultType.Base64,
+      source,
+      quality: 80,
+    })
+    if (photo.base64String) {
+      foto.value = `data:image/jpeg;base64,${photo.base64String}`
+      fotoAnotada.value = null
+      resultadoML.value = null
+    }
+  } catch {
+    // usuario canceló
+  }
+}
+
+async function seleccionarFoto() {
+  const sheet = await actionSheetController.create({
+    header: 'Foto del animal',
+    buttons: [
+      { text: 'Tomar foto', icon: cameraOutline, handler: () => { tomarFotoDesde(CameraSource.Camera) } },
+      { text: 'Elegir de galería', icon: imagesOutline, handler: () => { tomarFotoDesde(CameraSource.Photos) } },
+      { text: 'Cancelar', role: 'cancel' },
+    ],
+  })
+  await sheet.present()
+}
+
+async function estimarConIA() {
+  if (!foto.value) return
+
+  if (!form.raza) {
+    const alert = await alertController.create({
+      header: 'Selecciona la raza',
+      message: 'Para una mejor estimación, selecciona la raza del animal antes de estimar.',
+      buttons: ['OK'],
+    })
+    await alert.present()
+    return
+  }
+
+  estimandoPeso.value = true
+  resultadoML.value = null
+  fotoAnotada.value = null
+  try {
+    const breed = RAZA_TO_BREED[form.raza] ?? 'default'
+    const resultado = await estimarPesoDesdeImagen(foto.value, breed)
+    resultadoML.value = resultado
+    if (resultado.imagen_anotada) fotoAnotada.value = resultado.imagen_anotada
+    if (resultado.peso_estimado_kg > 0) form.peso_kg = resultado.peso_estimado_kg
+  } catch (e: any) {
+    const msg =
+      e?.response?.data?.sugerencia ??
+      e?.response?.data?.error ??
+      'No se pudo estimar el peso. Asegúrese de que el animal sea visible de perfil y bien iluminado.'
+    const alert = await alertController.create({
+      header: 'No se detectó el animal',
+      message: msg,
+      buttons: ['OK'],
+    })
+    await alert.present()
+  } finally {
+    estimandoPeso.value = false
+  }
 }
 
 async function guardar() {
   if (!form.arete || !form.nombre || !form.raza || !form.estado_comercial_id) return
   try {
+    const base = {
+      finca_id: form.finca_id,
+      arete: form.arete,
+      nombre: form.nombre,
+      raza: form.raza,
+      estado_comercial_id: form.estado_comercial_id,
+      ...(form.peso_kg !== '' && { peso_kg: Number(form.peso_kg) }),
+      ...(foto.value && { imagen: foto.value }),
+    }
     if (editMode.value && animalActual.value) {
       await updateGanado(animalActual.value.id, {
-        finca_id: form.finca_id,
-        arete: form.arete,
-        nombre: form.nombre,
-        raza: form.raza,
+        ...base,
         estado_salud_id: animalActual.value.estado_salud_id,
-        estado_comercial_id: form.estado_comercial_id,
       })
     } else {
-      await createGanado({
-        finca_id: form.finca_id,
-        arete: form.arete,
-        nombre: form.nombre,
-        raza: form.raza,
-        estado_salud_id: estadosSalud.value[0]?.id ?? 1,
-        estado_comercial_id: form.estado_comercial_id,
-      })
+      await createGanado({ ...base, estado_salud_id: estadosSalud.value[0]?.id ?? 1 })
     }
     showModal.value = false
     await cargar()
@@ -344,6 +434,76 @@ onMounted(cargar)
       </ion-header>
 
       <ion-content class="ion-padding modal-content">
+
+        <!-- FOTO -->
+        <div class="form-group">
+          <label class="form-label">Foto del animal</label>
+          <div v-if="foto" class="foto-preview-container">
+            <img :src="foto" class="foto-preview" alt="Foto del animal" />
+            <ion-button fill="clear" size="small" class="foto-change-btn" @click="seleccionarFoto">
+              <ion-icon :icon="cameraOutline" slot="start" />
+              Cambiar foto
+            </ion-button>
+          </div>
+          <ion-button v-else expand="block" fill="outline" color="medium" @click="seleccionarFoto">
+            <ion-icon :icon="cameraOutline" slot="start" />
+            Tomar foto / Cargar imagen
+          </ion-button>
+        </div>
+
+        <!-- ESTIMAR CON IA -->
+        <div v-if="foto" class="form-group">
+          <ion-button
+            expand="block"
+            fill="outline"
+            color="tertiary"
+            :disabled="estimandoPeso"
+            @click="estimarConIA"
+          >
+            <ion-spinner v-if="estimandoPeso" name="crescent" slot="start" />
+            <ion-icon v-else :icon="sparklesOutline" slot="start" />
+            {{ estimandoPeso ? 'Estimando...' : 'Estimar peso con IA' }}
+          </ion-button>
+          <div v-if="resultadoML" class="ml-resultado">
+            <!-- Imagen anotada con el animal marcado -->
+            <img v-if="fotoAnotada" :src="fotoAnotada" class="foto-anotada" alt="Animal detectado" />
+
+            <div class="ml-peso">~{{ resultadoML.peso_estimado_kg }} kg estimados</div>
+            <div class="ml-rango">Rango: {{ resultadoML.rango_min_kg }} – {{ resultadoML.rango_max_kg }} kg · Confianza: {{ Math.round(resultadoML.confianza * 100) }}%</div>
+
+            <!-- Medidas corporales -->
+            <div v-if="resultadoML.medidas && resultadoML.medidas.perimetro_toracico_cm > 0" class="ml-medidas">
+              <div class="ml-medida-item">
+                <span class="ml-medida-label">Perímetro torácico</span>
+                <span class="ml-medida-valor">{{ resultadoML.medidas.perimetro_toracico_cm }} cm</span>
+              </div>
+              <div class="ml-medida-item">
+                <span class="ml-medida-label">Largo del cuerpo</span>
+                <span class="ml-medida-valor">{{ resultadoML.medidas.largo_cuerpo_cm }} cm</span>
+              </div>
+              <div class="ml-medida-item">
+                <span class="ml-medida-label">Altura</span>
+                <span class="ml-medida-valor">{{ resultadoML.medidas.altura_cm }} cm</span>
+              </div>
+            </div>
+
+            <div v-if="resultadoML.advertencia" class="ml-advertencia">{{ resultadoML.advertencia }}</div>
+          </div>
+        </div>
+
+        <!-- PESO -->
+        <div class="form-group">
+          <label class="form-label">Peso (kg)</label>
+          <ion-input
+            v-model="form.peso_kg"
+            type="number"
+            placeholder="Ej: 450"
+            class="form-input"
+            fill="outline"
+            inputmode="decimal"
+          />
+        </div>
+
         <div class="form-group">
           <label class="form-label">Número de Identificación *</label>
           <ion-input v-model="form.arete" placeholder="Ej: 01239" class="form-input" fill="outline" />
@@ -440,4 +600,70 @@ onMounted(cargar)
 .form-input, .form-select { --border-radius: 10px; width: 100%; }
 .modal-actions { display: flex; flex-direction: column; gap: 8px; margin-top: 24px; }
 ion-button { --border-radius: 10px; }
+
+.foto-preview-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.foto-preview {
+  width: 100%;
+  max-height: 200px;
+  object-fit: cover;
+  border-radius: 10px;
+  border: 1px solid var(--ion-color-light-shade);
+}
+
+.foto-change-btn { --color: var(--ion-color-medium); }
+
+.ml-resultado {
+  margin-top: 10px;
+  padding: 12px 14px;
+  background: var(--ion-color-tertiary-tint, #f0eaff);
+  border-radius: 10px;
+  border-left: 4px solid var(--ion-color-tertiary, #7044ff);
+}
+
+.ml-peso {
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: var(--ion-color-dark);
+}
+
+.ml-rango {
+  font-size: 0.82rem;
+  color: var(--ion-color-medium);
+  margin-top: 2px;
+}
+
+.ml-advertencia {
+  font-size: 0.78rem;
+  color: var(--ion-color-warning-shade, #b7660a);
+  margin-top: 6px;
+}
+
+.foto-anotada {
+  width: 100%;
+  border-radius: 8px;
+  margin-bottom: 10px;
+  border: 2px solid #00c84a;
+}
+
+.ml-medidas {
+  margin-top: 8px;
+  border-top: 1px solid rgba(0,0,0,0.08);
+  padding-top: 8px;
+}
+
+.ml-medida-item {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.82rem;
+  padding: 3px 0;
+}
+
+.ml-medida-label { color: var(--ion-color-medium); }
+.ml-medida-valor { font-weight: 600; color: var(--ion-color-dark); }
 </style>
