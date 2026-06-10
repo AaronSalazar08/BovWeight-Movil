@@ -148,7 +148,7 @@ async function abrirExportar() {
 }
 
 function seleccionarAnimal(animal: Ganado) {
-  router.push(`/tabs/ganado/${animal.id}/historial`)
+  router.push(`/tabs/ganado/${animal.id}/detalle`)
 }
 
 async function cargar() {

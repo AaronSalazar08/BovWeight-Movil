@@ -90,7 +90,7 @@ function salirModoSeleccion() {
 }
 
 function seleccionarAnimal(animal: Ganado) {
-  router.push(`/tabs/ganado/${animal.id}/historial`)
+  router.push(`/tabs/ganado/${animal.id}/detalle`)
 }
 
 async function abrirExportar() {

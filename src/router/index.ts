@@ -97,6 +97,12 @@ const routes: Array<RouteRecordRaw> = [
       },
 
       {
+        path: 'ganado/:animalId/detalle',
+        name: 'DetalleGanado',
+        component: () => import('@/views/ganado/DetalleGanadoPage.vue'),
+      },
+
+      {
         path: 'ganado/:animalId/historial',
         name: 'HistorialGanado',
         component: () => import('@/views/ganado/HistorialGanadoPage.vue'),

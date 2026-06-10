@@ -42,11 +42,11 @@
           <ion-badge color="tertiary" class="module-badge">Ver fincas</ion-badge>
         </button>
 
-        <div class="module-card coming-soon">
+        <button class="module-card" type="button" @click="goToGanado">
           <ion-icon :icon="pawOutline" class="module-icon" />
           <p class="module-label">Ganado</p>
-          <ion-badge color="medium" class="module-badge">Próximamente</ion-badge>
-        </div>
+          <ion-badge color="tertiary" class="module-badge">Ver ganado</ion-badge>
+        </button>
 
         <div class="module-card coming-soon">
           <ion-icon :icon="cameraOutline" class="module-icon" />
@@ -116,6 +116,10 @@ async function handleRefresh(event: CustomEvent) {
 
 function goToFincasAsignadas() {
   router.push({ name: 'FincasAsignadas' })
+}
+
+function goToGanado() {
+  router.push({ name: 'MiGanado' })
 }
 </script>
 

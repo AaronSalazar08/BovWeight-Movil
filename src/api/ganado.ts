@@ -33,6 +33,11 @@ export interface Catalogo {
   nombre: string
 }
 
+export const getGanado = async (id: number): Promise<Ganado> => {
+  const response = await client.get(`/ganado/${id}`)
+  return response.data
+}
+
 export const getGanadoPorFinca = async (fincaId: number): Promise<Ganado[]> => {
   const response = await client.get('/ganado', { params: { finca_id: fincaId } })
   return response.data
@@ -55,6 +60,10 @@ export const updateGanado = async (id: number, data: Partial<CreateGanadoPayload
 
 export const deleteGanado = async (id: number): Promise<void> => {
   await client.delete(`/ganado/${id}`)
+}
+
+export const registrarPeso = async (id: number, peso: number): Promise<void> => {
+  await client.post(`/ganado/${id}/peso`, { peso })
 }
 
 export const getEstadosSalud = async (): Promise<Catalogo[]> => {
