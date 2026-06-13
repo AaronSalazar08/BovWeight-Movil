@@ -107,6 +107,13 @@ const routes: Array<RouteRecordRaw> = [
         name: 'HistorialGanado',
         component: () => import('@/views/ganado/HistorialGanadoPage.vue'),
       },
+
+      {
+        path: 'reportes',
+        name: 'Reportes',
+        component: () => import('@/views/reportes/ReportesPage.vue'),
+        meta: { requiresAuth: true, roles: ['Ganadero', 'Administrador'] },
+      },
     ],
   },
 ]

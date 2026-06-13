@@ -54,11 +54,11 @@
           <ion-badge color="medium" class="module-badge">Próximamente</ion-badge>
         </div>
 
-        <div class="module-card coming-soon">
-          <ion-icon :icon="timeOutline" class="module-icon" />
-          <p class="module-label">Historial</p>
-          <ion-badge color="medium" class="module-badge">Próximamente</ion-badge>
-        </div>
+        <button class="module-card" type="button" @click="goToReportes">
+          <ion-icon :icon="barChartOutline" class="module-icon" />
+          <p class="module-label">Reportes y Estadísticas</p>
+          <ion-badge color="success" class="module-badge">Ver reportes</ion-badge>
+        </button>
       </div>
 
       <!-- Aviso legal -->
@@ -83,7 +83,7 @@ import {
 } from '@ionic/vue'
 import {
   logOutOutline, personCircleOutline, businessOutline,
-  pawOutline, cameraOutline, timeOutline, informationCircleOutline,
+  pawOutline, cameraOutline, barChartOutline, informationCircleOutline,
 } from 'ionicons/icons'
 import { useAuthStore } from '@/stores/auth'
 
@@ -120,6 +120,10 @@ function goToFincas() {
 
 function goToMiGanado() {
   router.push({ name: 'MiGanado' })
+}
+
+function goToReportes() {
+  router.push({ name: 'Reportes' })
 }
 </script>
 
