@@ -1,21 +1,21 @@
-/* BovWeight CR — Tema verde agrícola */
+/* BovWeight CR — Tema teal ganadero */
 
 :root {
-  /* Primary — verde campo */
-  --ion-color-primary: #2d8a4e;
-  --ion-color-primary-rgb: 45, 138, 78;
+  /* Primary — teal */
+  --ion-color-primary: #008080;
+  --ion-color-primary-rgb: 0, 128, 128;
   --ion-color-primary-contrast: #ffffff;
   --ion-color-primary-contrast-rgb: 255, 255, 255;
-  --ion-color-primary-shade: #277945;
-  --ion-color-primary-tint: #429660;
+  --ion-color-primary-shade: #006666;
+  --ion-color-primary-tint: #66b2b2;
 
   /* Secondary */
-  --ion-color-secondary: #5daa72;
-  --ion-color-secondary-rgb: 93, 170, 114;
+  --ion-color-secondary: #66b2b2;
+  --ion-color-secondary-rgb: 102, 178, 178;
   --ion-color-secondary-contrast: #ffffff;
   --ion-color-secondary-contrast-rgb: 255, 255, 255;
-  --ion-color-secondary-shade: #529563;
-  --ion-color-secondary-tint: #6db380;
+  --ion-color-secondary-shade: #008080;
+  --ion-color-secondary-tint: #b2d8d8;
 
   /* Tertiary */
   --ion-color-tertiary: #3d7abf;
@@ -158,7 +158,7 @@ ion-alert,
 }
 
 .bov-alert .alert-button {
-  color: var(--ion-color-primary, #2d8a4e) !important;
+  color: var(--ion-color-primary, #008080) !important;
 }
 
 .bov-alert .alert-button.ion-color-danger,
@@ -211,12 +211,12 @@ ion-note {
 /* Modo oscuro (sistema) */
 @media (prefers-color-scheme: dark) {
   body {
-    --ion-color-primary: #42b869;
-    --ion-color-primary-rgb: 66, 184, 105;
+    --ion-color-primary: #66b2b2;
+    --ion-color-primary-rgb: 102, 178, 178;
     --ion-color-primary-contrast: #000000;
     --ion-color-primary-contrast-rgb: 0, 0, 0;
-    --ion-color-primary-shade: #3aa25c;
-    --ion-color-primary-tint: #55bf78;
+    --ion-color-primary-shade: #008080;
+    --ion-color-primary-tint: #b2d8d8;
 
     --ion-background-color: #121212;
     --ion-background-color-rgb: 18, 18, 18;
@@ -228,6 +228,6 @@ ion-note {
 
     --ion-item-background: #1e1e1e;
 
-    --ion-toolbar-background: #1f3d2b;
+    --ion-toolbar-background: #004c4c;
   }
 }

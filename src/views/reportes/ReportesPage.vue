@@ -96,12 +96,12 @@
                   :y="barY(item.count)"
                   :width="barSlotW * 0.7"
                   :height="(item.count / maxFincaCount) * BAR_IH"
-                  fill="#2d8a4e" rx="4"
+                  fill="#008080" rx="4"
                 />
                 <text
                   :x="BAR_PL + i * barSlotW + barSlotW / 2"
                   :y="barY(item.count) - 5"
-                  text-anchor="middle" font-size="11" fill="#1a5c2a" font-weight="600"
+                  text-anchor="middle" font-size="11" fill="#004c4c" font-weight="600"
                 >{{ item.count }}</text>
                 <text
                   :x="BAR_PL + i * barSlotW + barSlotW / 2"
@@ -189,8 +189,8 @@ const BAR_PR = 8
 const BAR_IH = BAR_H - BAR_PT - BAR_PB
 const BAR_SLOT_MIN = 72
 
-const PIE_COLORS = ['#2d8a4e', '#1a5c2a', '#4caf7d', '#6fcf97', '#a8d8b9', '#c8e6d4', '#38c172', '#82c79e']
-const ESTADO_COLORS = ['#2d8a4e', '#1a5c2a', '#4caf7d', '#6fcf97', '#82c79e']
+const PIE_COLORS = ['#008080', '#004c4c', '#66b2b2', '#b2d8d8', '#006666', '#b2d8d8', '#008080', '#66b2b2']
+const ESTADO_COLORS = ['#008080', '#004c4c', '#66b2b2', '#b2d8d8', '#006666']
 
 const ganado = ref<Ganado[]>([])
 const loading = ref(false)
@@ -352,7 +352,7 @@ function trunc(s: string, n: number) {
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
   text-align: center;
 }
-.stat-icon { font-size: 26px; color: #2d8a4e; }
+.stat-icon { font-size: 26px; color: #008080; }
 .stat-value { font-size: 22px; font-weight: 700; color: #1a1a1a; margin: 0; line-height: 1.1; }
 .stat-unit { font-size: 13px; font-weight: 400; color: #999; }
 .stat-label { font-size: 11px; color: #888; margin: 0; }
@@ -405,5 +405,5 @@ function trunc(s: string, n: number) {
 .estado-right { display: flex; align-items: center; gap: 10px; }
 .bar-bg { width: 80px; height: 6px; background: #f0f4f8; border-radius: 3px; overflow: hidden; }
 .bar-fill { height: 100%; border-radius: 3px; }
-.estado-count { font-size: 13px; font-weight: 600; color: #2d8a4e; min-width: 20px; text-align: right; }
+.estado-count { font-size: 13px; font-weight: 600; color: #008080; min-width: 20px; text-align: right; }
 </style>

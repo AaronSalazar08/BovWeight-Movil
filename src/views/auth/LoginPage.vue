@@ -158,7 +158,7 @@ async function handleLogin() {
 
 <style scoped>
 .login-content {
-  --background: linear-gradient(160deg, #1a5c2a 0%, #2d8a4e 40%, #e8f5e9 100%);
+  --background: linear-gradient(160deg, #004c4c 0%, #008080 40%, #e0f2f2 100%);
 }
 
 .login-wrapper {

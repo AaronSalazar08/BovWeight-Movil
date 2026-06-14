@@ -85,8 +85,8 @@
                 </g>
                 <defs>
                   <linearGradient id="areaGrad" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stop-color="#2d8a4e" stop-opacity="0.35" />
-                    <stop offset="100%" stop-color="#2d8a4e" stop-opacity="0" />
+                    <stop offset="0%" stop-color="#008080" stop-opacity="0.35" />
+                    <stop offset="100%" stop-color="#008080" stop-opacity="0" />
                   </linearGradient>
                 </defs>
                 <!-- Area fill -->
@@ -94,14 +94,14 @@
                 <!-- Polyline -->
                 <polyline
                   :points="polylinePoints"
-                  fill="none" stroke="#2d8a4e" stroke-width="2.5"
+                  fill="none" stroke="#008080" stroke-width="2.5"
                   stroke-linecap="round" stroke-linejoin="round"
                 />
                 <!-- Data points -->
                 <circle
                   v-for="(p, i) in chartPoints" :key="i"
                   :cx="p.x" :cy="p.y" r="4"
-                  fill="#fff" stroke="#2d8a4e" stroke-width="2"
+                  fill="#fff" stroke="#008080" stroke-width="2"
                 />
                 <!-- X labels (first, last, and sparse middle) -->
                 <text
@@ -335,7 +335,7 @@ function formatHora(createdAt: string): string {
 /* Animal card */
 .animal-card {
   margin: 16px 16px 0;
-  background: linear-gradient(135deg, #1a5c2a, #2d8a4e);
+  background: linear-gradient(135deg, #004c4c, #008080);
   border-radius: 16px;
   padding: 20px;
   display: flex;
@@ -412,7 +412,7 @@ function formatHora(createdAt: string): string {
 .record-hora { font-size: 10px; color: #bbb; margin: 2px 0 0; }
 
 .record-center { flex: 1; min-width: 0; }
-.record-peso { font-size: 18px; font-weight: 700; color: #1a5c2a; margin: 0; }
+.record-peso { font-size: 18px; font-weight: 700; color: #006666; margin: 0; }
 .kg-unit { font-size: 13px; font-weight: 400; color: #999; }
 .record-estimado { font-size: 11px; color: #aaa; margin: 2px 0 0; }
 
