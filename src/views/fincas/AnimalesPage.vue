@@ -45,6 +45,7 @@ import {
   createGanado,
   updateGanado,
   deleteGanado,
+  registrarPeso,
   getEstadosSalud,
   getEstadosComerciales,
   type Ganado,
@@ -278,16 +279,26 @@ async function guardar() {
       nombre: form.nombre,
       raza: form.raza,
       estado_comercial_id: form.estado_comercial_id,
-      ...(form.peso_kg !== '' && { peso_kg: Number(form.peso_kg) }),
       ...(foto.value && { imagen: foto.value }),
     }
+
+    // El peso no es una columna de "ganado": se guarda como registro de
+    // peso aparte (tabla registro_pesos), igual que en DetalleGanadoPage.vue.
+    const pesoNuevo = form.peso_kg !== '' ? Number(form.peso_kg) : null
+
     if (editMode.value && animalActual.value) {
       await updateGanado(animalActual.value.id, {
         ...base,
         estado_salud_id: animalActual.value.estado_salud_id,
       })
+      if (pesoNuevo != null && pesoNuevo !== animalActual.value.peso_kg) {
+        await registrarPeso(animalActual.value.id, pesoNuevo)
+      }
     } else {
-      await createGanado({ ...base, estado_salud_id: estadosSalud.value[0]?.id ?? 1 })
+      const nuevo = await createGanado({ ...base, estado_salud_id: estadosSalud.value[0]?.id ?? 1 })
+      if (pesoNuevo != null) {
+        await registrarPeso(nuevo.id, pesoNuevo)
+      }
     }
     showModal.value = false
     await cargar()
