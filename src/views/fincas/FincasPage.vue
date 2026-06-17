@@ -43,6 +43,7 @@ import {
   type Finca,
 } from '@/api/fincas'
 
+import { solicitudesVetApi, type SolicitudVeterinarioPayload } from '@/api/solicitudesVet'
 import { useAuthStore } from '@/stores/auth'
 import { useRouter } from 'vue-router'
 
@@ -71,6 +72,15 @@ const form = reactive({
   area: 0,
   numero_finca: '',
 })
+
+const showVetModal = ref(false)
+const fincaParaVet = ref<Finca | null>(null)
+const vetForm = reactive<SolicitudVeterinarioPayload>({
+  finca_id: 0,
+  correo_veterinario: '',
+})
+const vetError = ref('')
+const vetLoading = ref(false)
 
 const loadFincas = async () => {
 
@@ -233,50 +243,70 @@ async function eliminarFinca(id: number) {
 
 }
 
+function abrirModalVet(finca: Finca) {
+  fincaParaVet.value = finca
+  vetForm.finca_id = finca.id
+  vetForm.correo_veterinario = ''
+  vetError.value = ''
+  showVetModal.value = true
+}
+
+async function enviarSolicitudVet() {
+  if (!vetForm.correo_veterinario) {
+    vetError.value = 'El correo del veterinario es requerido.'
+    return
+  }
+  vetLoading.value = true
+  vetError.value = ''
+  try {
+    await solicitudesVetApi.create(vetForm)
+    showVetModal.value = false
+    const alert = await alertController.create({
+      header: 'Solicitud enviada',
+      message: 'Tu solicitud de veterinario fue enviada al administrador.',
+      buttons: ['OK'],
+    })
+    await alert.present()
+  } catch (error: any) {
+    vetError.value = error?.response?.data?.message ?? 'Error al enviar la solicitud.'
+  } finally {
+    vetLoading.value = false
+  }
+}
+
 async function openOptions(finca: Finca) {
-  if (!canManageFincas.value) return
+  const buttons: any[] = []
 
-  const actionSheet = await actionSheetController.create({
-
-    header: finca.nombre,
-
-    cssClass: 'bov-action-sheet',
-
-    buttons: [
-
+  if (canManageFincas.value) {
+    buttons.push(
       {
         text: 'Editar',
-
-        handler: () => {
-
-          editarFinca(finca)
-
-        },
+        handler: () => { editarFinca(finca) },
       },
-
       {
         text: 'Eliminar',
-
         role: 'destructive',
-
-        handler: () => {
-
-          eliminarFinca(finca.id)
-
-        },
+        handler: () => { eliminarFinca(finca.id) },
       },
+    )
+  }
 
-      {
-        text: 'Cancelar',
-        role: 'cancel',
-      },
+  if (authStore.isGanadero) {
+    buttons.push({
+      text: 'Solicitar Veterinario',
+      handler: () => { abrirModalVet(finca) },
+    })
+  }
 
-    ],
+  buttons.push({ text: 'Cancelar', role: 'cancel' })
 
+  const actionSheet = await actionSheetController.create({
+    header: finca.nombre,
+    cssClass: 'bov-action-sheet',
+    buttons,
   })
 
   await actionSheet.present()
-
 }
 
 onMounted(() => {
@@ -359,7 +389,7 @@ onMounted(() => {
           </ion-button>
 
           <ion-button
-            v-if="canManageFincas"
+            v-if="canManageFincas || authStore.isGanadero"
             slot="end"
             fill="clear"
             @click="openOptions(finca)"
@@ -400,7 +430,49 @@ onMounted(() => {
 
       </ion-fab>
 
-      <!-- MODAL -->
+      <!-- MODAL SOLICITUD DE VETERINARIO -->
+
+      <ion-modal :is-open="showVetModal">
+
+        <ion-header>
+          <ion-toolbar color="primary">
+            <ion-title>Solicitar Veterinario</ion-title>
+          </ion-toolbar>
+        </ion-header>
+
+        <ion-content class="ion-padding modal-content">
+
+          <p style="color: var(--ion-color-medium); font-size: 0.9rem; padding-bottom: 8px">
+            Finca: <strong>{{ fincaParaVet?.nombre }}</strong>
+          </p>
+
+          <ion-item>
+            <ion-label position="stacked">Correo del veterinario *</ion-label>
+            <ion-input
+              v-model="vetForm.correo_veterinario"
+              type="email"
+              placeholder="correo@ejemplo.com"
+            />
+          </ion-item>
+
+          <p v-if="vetError" style="color: var(--ion-color-danger); font-size: 0.85rem; padding: 8px 16px 0">
+            {{ vetError }}
+          </p>
+
+          <ion-button expand="block" class="ion-margin-top" :disabled="vetLoading" @click="enviarSolicitudVet">
+            <span v-if="vetLoading">Enviando...</span>
+            <span v-else>Enviar Solicitud</span>
+          </ion-button>
+
+          <ion-button expand="block" fill="outline" @click="showVetModal = false">
+            Cancelar
+          </ion-button>
+
+        </ion-content>
+
+      </ion-modal>
+
+      <!-- MODAL CREAR / EDITAR FINCA -->
 
       <ion-modal :is-open="showModal">
 

@@ -146,7 +146,7 @@ async function handleLogout() {
   width: 80px;
   height: 80px;
   border-radius: 50%;
-  background: linear-gradient(135deg, #1a5c2a, #2d8a4e);
+  background: linear-gradient(135deg, #004c4c, #008080);
   display: flex;
   align-items: center;
   justify-content: center;
