@@ -37,6 +37,8 @@ export const estimarPesoDesdeImagen = async (
   formData.append('image', blob, 'animal.jpg')
   formData.append('breed', breed)
 
-  const response = await axios.post(`${mlUrl}/api/estimate`, formData)
+  const response = await axios.post(`${mlUrl}/api/estimate`, formData, {
+    headers: { 'ngrok-skip-browser-warning': 'true' },
+  })
   return response.data
 }
