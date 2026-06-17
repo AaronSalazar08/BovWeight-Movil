@@ -136,7 +136,7 @@ function goToFincas() {
 }
 
 .welcome-card {
-  background: linear-gradient(135deg, #1a5c2a, #2d8a4e);
+  background: linear-gradient(135deg, #004c4c, #008080);
   border-radius: 16px;
   padding: 20px;
   display: flex;
