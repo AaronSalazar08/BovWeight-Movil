@@ -45,10 +45,14 @@ import {
 
 import { solicitudesVetApi, type SolicitudVeterinarioPayload } from '@/api/solicitudesVet'
 import { useAuthStore } from '@/stores/auth'
+import { useEstimacionPendienteStore } from '@/stores/estimacionPendiente'
+import { useToast } from '@/composables/useToast'
 import { useRouter } from 'vue-router'
 
 const router = useRouter()
 const authStore = useAuthStore()
+const estimacionPendienteStore = useEstimacionPendienteStore()
+const { info } = useToast()
 const canManageFincas = computed(() => !authStore.isVeterinario)
 
 const fincas = ref<Finca[]>([])
@@ -312,6 +316,10 @@ async function openOptions(finca: Finca) {
 onMounted(() => {
 
   loadFincas()
+
+  if (estimacionPendienteStore.hayPendiente) {
+    info('Selecciona la finca donde se registrará el animal estimado.')
+  }
 
 })
 

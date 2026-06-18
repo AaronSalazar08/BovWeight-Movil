@@ -55,12 +55,14 @@ import { getFinca, getFincas, type Finca } from '@/api/fincas'
 import { exportarPDF, exportarExcel } from '@/utils/exportarGanado'
 import { estimarPesoDesdeImagen, type MLEstimacion, type MLMedidas } from '@/api/ml'
 import { usePermisosGanado } from '@/composables/usePermisosGanado'
+import { useEstimacionPendienteStore } from '@/stores/estimacionPendiente'
 
 const route = useRoute()
 const router = useRouter()
 const fincaId = Number(route.params.fincaId)
 
 const { puedeAgregarGanado, puedeEditarCompleto } = usePermisosGanado()
+const estimacionPendienteStore = useEstimacionPendienteStore()
 
 const finca = ref<Finca | null>(null)
 const fincas = ref<Finca[]>([])
@@ -81,9 +83,12 @@ const fotoAnotada = ref<string | null>(null)
 const estimandoPeso = ref(false)
 const resultadoML = ref<MLEstimacion | null>(null)
 
+const SEXOS: Array<'Macho' | 'Hembra'> = ['Macho', 'Hembra']
+
 const form = reactive({
   arete: '',
   nombre: '',
+  sexo: '' as '' | 'Macho' | 'Hembra',
   raza: '',
   finca_id: fincaId,
   estado_comercial_id: 0,
@@ -182,6 +187,7 @@ function abrirModal() {
   animalActual.value = null
   form.arete = ''
   form.nombre = ''
+  form.sexo = ''
   form.raza = ''
   form.finca_id = fincaId
   form.estado_comercial_id = estadosComerciales.value[0]?.id ?? 0
@@ -192,11 +198,29 @@ function abrirModal() {
   showModal.value = true
 }
 
+function abrirModalConEstimacionPendiente() {
+  editMode.value = false
+  animalActual.value = null
+  form.arete = ''
+  form.nombre = ''
+  form.sexo = ''
+  form.raza = estimacionPendienteStore.raza
+  form.finca_id = fincaId
+  form.estado_comercial_id = estadosComerciales.value[0]?.id ?? 0
+  form.peso_kg = estimacionPendienteStore.pesoKg ?? ''
+  foto.value = estimacionPendienteStore.foto
+  fotoAnotada.value = estimacionPendienteStore.fotoAnotada
+  resultadoML.value = estimacionPendienteStore.resultadoML
+  estimacionPendienteStore.clear()
+  showModal.value = true
+}
+
 function editarAnimal(animal: Ganado) {
   editMode.value = true
   animalActual.value = animal
   form.arete = animal.arete
   form.nombre = animal.nombre ?? ''
+  form.sexo = animal.sexo ?? ''
   form.raza = animal.raza
   form.finca_id = animal.finca_id
   form.estado_comercial_id = animal.estado_comercial_id
@@ -274,12 +298,13 @@ async function estimarConIA() {
 }
 
 async function guardar() {
-  if (!form.arete || !form.nombre || !form.raza || !form.estado_comercial_id) return
+  if (!form.arete || !form.nombre || !form.sexo || !form.raza || !form.estado_comercial_id) return
   try {
     const base = {
       finca_id: form.finca_id,
       arete: form.arete,
       nombre: form.nombre,
+      sexo: form.sexo,
       raza: form.raza,
       estado_comercial_id: form.estado_comercial_id,
       ...(foto.value && { imagen: foto.value }),
@@ -346,7 +371,12 @@ async function abrirOpciones(animal: Ganado) {
   await sheet.present()
 }
 
-onMounted(cargar)
+onMounted(async () => {
+  await cargar()
+  if (estimacionPendienteStore.hayPendiente) {
+    abrirModalConEstimacionPendiente()
+  }
+})
 </script>
 
 <template>
@@ -539,6 +569,13 @@ onMounted(cargar)
           <label class="form-label">Raza *</label>
           <ion-select v-model="form.raza" placeholder="Selecciona la raza" class="form-select" fill="outline">
             <ion-select-option v-for="r in RAZAS" :key="r" :value="r">{{ r }}</ion-select-option>
+          </ion-select>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Sexo *</label>
+          <ion-select v-model="form.sexo" placeholder="Selecciona el sexo" class="form-select" fill="outline">
+            <ion-select-option v-for="s in SEXOS" :key="s" :value="s">{{ s }}</ion-select-option>
           </ion-select>
         </div>
 

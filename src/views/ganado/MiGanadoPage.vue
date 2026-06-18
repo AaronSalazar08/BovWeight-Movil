@@ -52,10 +52,12 @@ const modoSeleccion = ref(false)
 const seleccionados = ref<Set<number>>(new Set())
 
 const RAZAS = ['Holstein', 'Angus', 'Jersey', 'Hereford', 'Brahman', 'Simmental', 'Cebuíno', 'Criollo']
+const SEXOS: Array<'Macho' | 'Hembra'> = ['Macho', 'Hembra']
 
 const form = reactive({
   arete: '',
   nombre: '',
+  sexo: '' as '' | 'Macho' | 'Hembra',
   raza: '',
   finca_id: 0,
   estado_comercial_id: 0,
@@ -139,6 +141,7 @@ function editarAnimal(animal: Ganado) {
   animalActual.value = animal
   form.arete = animal.arete
   form.nombre = animal.nombre ?? ''
+  form.sexo = animal.sexo ?? ''
   form.raza = animal.raza
   form.finca_id = animal.finca_id
   form.estado_comercial_id = animal.estado_comercial_id
@@ -146,12 +149,13 @@ function editarAnimal(animal: Ganado) {
 }
 
 async function guardar() {
-  if (!form.arete || !form.nombre || !form.raza || !form.estado_comercial_id || !animalActual.value) return
+  if (!form.arete || !form.nombre || !form.sexo || !form.raza || !form.estado_comercial_id || !animalActual.value) return
   try {
     await updateGanado(animalActual.value.id, {
       finca_id: form.finca_id,
       arete: form.arete,
       nombre: form.nombre,
+      sexo: form.sexo,
       raza: form.raza,
       estado_salud_id: animalActual.value.estado_salud_id,
       estado_comercial_id: form.estado_comercial_id,
@@ -312,6 +316,13 @@ onMounted(cargar)
           <label class="form-label">Raza *</label>
           <ion-select v-model="form.raza" class="form-select" fill="outline">
             <ion-select-option v-for="r in RAZAS" :key="r" :value="r">{{ r }}</ion-select-option>
+          </ion-select>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Sexo *</label>
+          <ion-select v-model="form.sexo" placeholder="Selecciona el sexo" class="form-select" fill="outline">
+            <ion-select-option v-for="s in SEXOS" :key="s" :value="s">{{ s }}</ion-select-option>
           </ion-select>
         </div>
 

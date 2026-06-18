@@ -70,10 +70,12 @@ const RAZA_TO_BREED: Record<string, string> = {
   Cebuíno: 'cebu',
   Criollo: 'criollo',
 }
+const SEXOS: Array<'Macho' | 'Hembra'> = ['Macho', 'Hembra']
 
 const form = reactive({
   arete: '',
   nombre: '',
+  sexo: '' as '' | 'Macho' | 'Hembra',
   raza: '',
   finca_id: 0,
   estado_comercial_id: 0,
@@ -104,6 +106,7 @@ function abrirEditar() {
   if (!animal.value) return
   form.arete = animal.value.arete
   form.nombre = animal.value.nombre ?? ''
+  form.sexo = animal.value.sexo ?? ''
   form.raza = animal.value.raza
   form.finca_id = animal.value.finca_id
   form.estado_comercial_id = animal.value.estado_comercial_id
@@ -209,13 +212,14 @@ async function estimarConIA() {
 }
 
 async function guardar() {
-  if (!form.arete || !form.nombre || !form.raza || !form.estado_comercial_id) return
+  if (!form.arete || !form.nombre || !form.sexo || !form.raza || !form.estado_comercial_id) return
   if (!animal.value) return
   try {
     await updateGanado(animal.value.id, {
       finca_id: form.finca_id,
       arete: form.arete,
       nombre: form.nombre,
+      sexo: form.sexo,
       raza: form.raza,
       estado_comercial_id: form.estado_comercial_id,
       estado_salud_id: animal.value.estado_salud_id,
@@ -425,6 +429,13 @@ onMounted(cargar)
           <label class="form-label">Raza *</label>
           <ion-select v-model="form.raza" placeholder="Selecciona la raza" class="form-select" fill="outline">
             <ion-select-option v-for="r in RAZAS" :key="r" :value="r">{{ r }}</ion-select-option>
+          </ion-select>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Sexo *</label>
+          <ion-select v-model="form.sexo" placeholder="Selecciona el sexo" class="form-select" fill="outline">
+            <ion-select-option v-for="s in SEXOS" :key="s" :value="s">{{ s }}</ion-select-option>
           </ion-select>
         </div>
 
