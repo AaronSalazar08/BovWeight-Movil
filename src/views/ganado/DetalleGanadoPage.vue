@@ -36,12 +36,14 @@ import {
   registrarPeso,
   getEstadosSalud,
   getEstadosComerciales,
+  actualizarEstadoSalud,
   type Ganado,
   type Catalogo,
 } from '@/api/ganado'
 import { getFincas, type Finca } from '@/api/fincas'
 import { estimarPesoDesdeImagen, type MLEstimacion } from '@/api/ml'
 import { alertController, actionSheetController } from '@ionic/vue'
+import { usePermisosGanado } from '@/composables/usePermisosGanado'
 
 const route = useRoute()
 const router = useRouter()
@@ -49,6 +51,8 @@ const animalId = Number(route.params.animalId)
 
 const animal = ref<Ganado | null>(null)
 const loading = ref(false)
+
+const { puedeEditarCompleto, puedeEditarEstadoSalud, campoEstadoPrincipal } = usePermisosGanado()
 
 const fincas = ref<Finca[]>([])
 const estadosComerciales = ref<Catalogo[]>([])
@@ -108,6 +112,33 @@ function abrirEditar() {
   fotoAnotada.value = null
   resultadoML.value = null
   showModal.value = true
+}
+
+async function abrirSelectorEstadoSalud() {
+  if (!puedeEditarEstadoSalud.value || !animal.value) return
+
+  const sheet = await actionSheetController.create({
+    header: 'Estado de salud',
+    buttons: [
+      ...estadosSalud.value.map((estado) => ({
+        text: estado.nombre,
+        handler: async () => {
+          try {
+            animal.value = await actualizarEstadoSalud(animal.value!.id, estado.id)
+          } catch (e: any) {
+            const alert = await alertController.create({
+              header: 'No se pudo actualizar',
+              message: e?.response?.data?.message ?? 'Ocurrió un error al actualizar el estado de salud.',
+              buttons: ['OK'],
+            })
+            await alert.present()
+          }
+        },
+      })),
+      { text: 'Cancelar', role: 'cancel' },
+    ],
+  })
+  await sheet.present()
 }
 
 async function tomarFotoDesde(source: CameraSource) {
@@ -220,7 +251,7 @@ onMounted(cargar)
         </ion-buttons>
         <ion-title>Gestión Ganadera</ion-title>
         <ion-buttons slot="end">
-          <ion-button fill="clear" :disabled="!animal" @click="abrirEditar">
+          <ion-button v-if="puedeEditarCompleto" fill="clear" :disabled="!animal" @click="abrirEditar">
             <ion-icon :icon="createOutline" />
           </ion-button>
           <ion-button fill="clear" @click="router.push('/tabs/perfil')">
@@ -281,12 +312,16 @@ onMounted(cargar)
               </div>
             </div>
 
-            <div class="info-col">
+            <div
+              class="info-col"
+              :class="{ 'info-col-tocable': puedeEditarEstadoSalud }"
+              @click="puedeEditarEstadoSalud ? abrirSelectorEstadoSalud() : undefined"
+            >
               <div class="info-titulo">ESTADO</div>
-              <div class="info-valor">{{ animal.estado_comercial?.nombre ?? '—' }}</div>
+              <div class="info-valor">{{ animal[campoEstadoPrincipal]?.nombre ?? '—' }}</div>
               <div class="info-sub">
-                <span class="dot dot-verde" />
-                {{ animal.estado_salud?.nombre ?? '—' }}
+                <span class="dot" :class="puedeEditarEstadoSalud ? 'dot-azul' : 'dot-verde'" />
+                {{ puedeEditarEstadoSalud ? 'Toca para cambiar' : (animal.estado_salud?.nombre ?? '—') }}
               </div>
             </div>
           </div>
@@ -588,6 +623,14 @@ onMounted(cargar)
 
 .dot-verde {
   background: #43a047;
+}
+
+.dot-azul {
+  background: #1e88e5;
+}
+
+.info-col-tocable {
+  cursor: pointer;
 }
 
 /* BOTÓN HISTORIAL */
