@@ -2,6 +2,11 @@
   <ion-page>
     <ion-header>
       <ion-toolbar color="primary">
+        <ion-buttons slot="start">
+          <ion-button fill="clear" @click="irAInicio">
+            <ion-icon :icon="arrowBackOutline" />
+          </ion-button>
+        </ion-buttons>
         <ion-title>Mi Perfil</ion-title>
       </ion-toolbar>
     </ion-header>
@@ -69,11 +74,12 @@ import { useRouter } from 'vue-router'
 import {
   IonPage, IonHeader, IonToolbar, IonTitle, IonContent,
   IonList, IonItem, IonLabel, IonIcon, IonBadge,
+  IonButtons, IonButton,
   alertController,
 } from '@ionic/vue'
 import {
   mailOutline, shieldCheckmarkOutline, calendarOutline,
-  logOutOutline, informationCircleOutline,
+  logOutOutline, informationCircleOutline, arrowBackOutline,
 } from 'ionicons/icons'
 import { useAuthStore } from '@/stores/auth'
 import { format } from 'date-fns'
@@ -108,6 +114,11 @@ const memberSince = computed(() => {
     return fecha
   }
 })
+
+function irAInicio() {
+  const destino = authStore.user?.tipo === 'Veterinario' ? 'HomeVeterinario' : 'HomeGanadero'
+  router.push({ name: destino })
+}
 
 async function handleLogout() {
   const alert = await alertController.create({

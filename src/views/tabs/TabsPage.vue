@@ -10,6 +10,11 @@
           <ion-label>Inicio</ion-label>
         </ion-tab-button>
 
+        <ion-tab-button tab="mi-ganado" href="/tabs/mi-ganado">
+          <ion-icon :icon="searchOutline" />
+          <ion-label>Buscar</ion-label>
+        </ion-tab-button>
+
         <ion-tab-button tab="perfil" href="/tabs/perfil">
           <ion-icon :icon="personOutline" />
           <ion-label>Perfil</ion-label>
@@ -23,6 +28,11 @@
           <ion-label>Inicio</ion-label>
         </ion-tab-button>
 
+        <ion-tab-button tab="mi-ganado" href="/tabs/mi-ganado">
+          <ion-icon :icon="searchOutline" />
+          <ion-label>Buscar</ion-label>
+        </ion-tab-button>
+
         <ion-tab-button tab="perfil" href="/tabs/perfil">
           <ion-icon :icon="personOutline" />
           <ion-label>Perfil</ion-label>
@@ -31,6 +41,11 @@
 
       <!-- Tab bar: Administrador (fallback — el admin usa el panel web) -->
       <ion-tab-bar v-else slot="bottom" color="primary">
+        <ion-tab-button tab="mi-ganado" href="/tabs/mi-ganado">
+          <ion-icon :icon="searchOutline" />
+          <ion-label>Buscar</ion-label>
+        </ion-tab-button>
+
         <ion-tab-button tab="perfil" href="/tabs/perfil">
           <ion-icon :icon="personOutline" />
           <ion-label>Perfil</ion-label>
@@ -44,7 +59,7 @@
 import {
   IonPage, IonTabs, IonRouterOutlet, IonTabBar, IonTabButton, IonIcon, IonLabel,
 } from '@ionic/vue'
-import { homeOutline, personOutline } from 'ionicons/icons'
+import { homeOutline, personOutline, searchOutline } from 'ionicons/icons'
 import { useAuthStore } from '@/stores/auth'
 
 const authStore = useAuthStore()

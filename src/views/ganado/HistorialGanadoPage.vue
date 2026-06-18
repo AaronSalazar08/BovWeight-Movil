@@ -46,16 +46,6 @@
           </div>
         </div>
 
-        <!-- Búsqueda por arete -->
-        <div class="search-section">
-          <ion-searchbar
-            v-model="busqueda"
-            placeholder="Arete del animal..."
-            show-clear-button="focus"
-            class="arete-search"
-          />
-        </div>
-
         <!-- Sin registros -->
         <div v-if="!historial.length" class="center-state no-records">
           <ion-icon :icon="scaleOutline" class="state-icon" />
@@ -151,7 +141,7 @@
 <script setup lang="ts">
 import {
   IonPage, IonHeader, IonToolbar, IonTitle, IonContent, IonBackButton,
-  IonButtons, IonButton, IonIcon, IonSpinner, IonSearchbar,
+  IonButtons, IonButton, IonIcon, IonSpinner,
   IonRefresher, IonRefresherContent,
 } from '@ionic/vue'
 import { alertCircleOutline, pawOutline, scaleOutline } from 'ionicons/icons'
@@ -174,7 +164,6 @@ const animalId = Number(route.params.animalId)
 
 const animal = ref<Ganado | null>(null)
 const historial = ref<RegistroPeso[]>([])
-const busqueda = ref('')
 const loading = ref(false)
 const error = ref<string | null>(null)
 
@@ -184,7 +173,6 @@ async function cargarDatos() {
   try {
     const animalData = await getGanado(animalId)
     animal.value = animalData
-    busqueda.value = animalData.arete
 
     const historialData = await getHistorialPeso(animalId)
     historial.value = historialData.map(r => ({
@@ -368,10 +356,6 @@ function formatHora(createdAt: string): string {
 }
 .badge-num { font-size: 22px; font-weight: 700; line-height: 1; }
 .badge-lbl { font-size: 10px; color: rgba(255, 255, 255, 0.75); }
-
-/* Search */
-.search-section { padding: 12px 8px 4px; }
-.arete-search { --background: #fff; --border-radius: 12px; }
 
 /* Section title */
 .section-title { padding: 20px 16px 8px; }
