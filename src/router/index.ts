@@ -112,7 +112,7 @@ const routes: Array<RouteRecordRaw> = [
         path: 'reportes',
         name: 'Reportes',
         component: () => import('@/views/reportes/ReportesPage.vue'),
-        meta: { requiresAuth: true, roles: ['Ganadero', 'Administrador'] },
+        meta: { requiresAuth: true, roles: ['Ganadero', 'Administrador', 'Veterinario'] },
       },
     ],
   },
