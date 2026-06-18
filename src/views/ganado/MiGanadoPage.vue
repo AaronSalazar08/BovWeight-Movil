@@ -35,8 +35,10 @@ import {
 } from '@/api/ganado'
 import { getFincas, type Finca } from '@/api/fincas'
 import { exportarPDF, exportarExcel } from '@/utils/exportarGanado'
+import { usePermisosGanado } from '@/composables/usePermisosGanado'
 
 const router = useRouter()
+const { puedeEditarCompleto } = usePermisosGanado()
 
 const animales = ref<Ganado[]>([])
 const fincas = ref<Finca[]>([])
@@ -256,7 +258,7 @@ onMounted(cargar)
             <ion-button slot="end" fill="outline" size="small" color="primary" @click.stop="seleccionarAnimal(animal)">
               Seleccionar
             </ion-button>
-            <ion-button slot="end" fill="clear" @click.stop="abrirOpciones(animal)">
+            <ion-button v-if="puedeEditarCompleto" slot="end" fill="clear" @click.stop="abrirOpciones(animal)">
               <ion-icon :icon="ellipsisVertical" />
             </ion-button>
           </template>
