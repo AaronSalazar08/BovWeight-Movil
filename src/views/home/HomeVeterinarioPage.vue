@@ -48,12 +48,6 @@
           <ion-badge color="tertiary" class="module-badge">Ver ganado</ion-badge>
         </button>
 
-        <div class="module-card coming-soon">
-          <ion-icon :icon="cameraOutline" class="module-icon" />
-          <p class="module-label">Estimar Peso</p>
-          <ion-badge color="medium" class="module-badge">Próximamente</ion-badge>
-        </div>
-
         <button class="module-card" type="button" @click="goToHistorial">
           <ion-icon :icon="barChartOutline" class="module-icon" />
           <p class="module-label">Historial General</p>
@@ -83,7 +77,7 @@ import {
 } from '@ionic/vue'
 import {
   logOutOutline, medkitOutline, businessOutline,
-  pawOutline, cameraOutline, barChartOutline, informationCircleOutline,
+  pawOutline, barChartOutline, informationCircleOutline,
 } from 'ionicons/icons'
 import { useAuthStore } from '@/stores/auth'
 
