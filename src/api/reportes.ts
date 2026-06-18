@@ -13,7 +13,22 @@ export interface RegistroPeso {
   created_at: string
 }
 
+export interface RegistroPesoConGanado extends RegistroPeso {
+  ganado: {
+    id: number
+    nombre: string | null
+    arete: string
+    raza: string
+    imagen: string | null
+  }
+}
+
 export const getHistorialPeso = async (ganadoId: number): Promise<RegistroPeso[]> => {
   const response = await client.get(`/ganado/${ganadoId}/historial`)
+  return response.data
+}
+
+export const getPesajesRecientes = async (limit = 5): Promise<RegistroPesoConGanado[]> => {
+  const response = await client.get('/pesajes/recientes', { params: { limit } })
   return response.data
 }

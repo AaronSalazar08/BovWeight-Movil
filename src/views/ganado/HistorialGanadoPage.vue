@@ -54,81 +54,130 @@
         </div>
 
         <template v-else>
-          <!-- Evolución de peso -->
-          <div v-if="chartData.length > 1">
-            <div class="section-title">
-              <h3>Evolución de Peso</h3>
-            </div>
-            <div class="chart-card">
-              <svg :viewBox="`0 0 ${LINE_W} ${LINE_H}`" class="line-svg">
-                <!-- Grid lines + Y labels -->
-                <g v-for="tick in lineTicks" :key="'g' + tick">
-                  <line
-                    :x1="LINE_PL" :y1="lineY(tick)"
-                    :x2="LINE_W - LINE_PR" :y2="lineY(tick)"
-                    stroke="#eef1f4" stroke-width="1"
-                  />
-                  <text
-                    :x="LINE_PL - 4" :y="lineY(tick) + 4"
-                    text-anchor="end" font-size="10" fill="#bbb"
-                  >{{ tick }}</text>
-                </g>
-                <defs>
-                  <linearGradient id="areaGrad" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stop-color="#008080" stop-opacity="0.35" />
-                    <stop offset="100%" stop-color="#008080" stop-opacity="0" />
-                  </linearGradient>
-                </defs>
-                <!-- Area fill -->
-                <polygon :points="polygonPoints" fill="url(#areaGrad)" />
-                <!-- Polyline -->
-                <polyline
-                  :points="polylinePoints"
-                  fill="none" stroke="#008080" stroke-width="2.5"
-                  stroke-linecap="round" stroke-linejoin="round"
-                />
-                <!-- Data points -->
-                <circle
-                  v-for="(p, i) in chartPoints" :key="i"
-                  :cx="p.x" :cy="p.y" r="4"
-                  fill="#fff" stroke="#008080" stroke-width="2"
-                />
-                <!-- X labels (first, last, and sparse middle) -->
-                <text
-                  v-for="(p, i) in sparseLabels" :key="'xl' + i"
-                  :x="p.x" :y="LINE_H - LINE_PB + 14"
-                  text-anchor="middle" font-size="9" fill="#999"
-                >{{ p.label }}</text>
-              </svg>
-              <div class="chart-footer">
-                <span class="chart-min">Mín: {{ chartMin.toFixed(1) }} kg</span>
-                <span class="chart-max">Máx: {{ chartMax.toFixed(1) }} kg</span>
+          <!-- Filtro de fechas -->
+          <div class="date-filter">
+            <button class="date-filter-btn" type="button" @click="showDatePicker = !showDatePicker">
+              <div class="date-filter-left">
+                <ion-icon :icon="calendarOutline" />
+                <span>
+                  {{ startDate || endDate
+                    ? `${startDate ? formatFechaCorta(startDate) : 'Inicio'} - ${endDate ? formatFechaCorta(endDate) : 'Fin'}`
+                    : 'Seleccionar rango de fechas' }}
+                </span>
+              </div>
+              <ion-icon
+                v-if="startDate || endDate"
+                :icon="closeOutline"
+                class="date-filter-clear"
+                @click.stop="limpiarFiltro"
+              />
+            </button>
+
+            <div v-if="showDatePicker" class="date-filter-panel">
+              <div class="date-filter-field">
+                <label>Fecha inicio</label>
+                <input type="date" v-model="startDate" />
+              </div>
+              <div class="date-filter-field">
+                <label>Fecha fin</label>
+                <input type="date" v-model="endDate" />
               </div>
             </div>
           </div>
 
-          <!-- Lista de registros -->
-          <div class="section-title">
-            <h3>Registros ({{ historial.length }})</h3>
+          <!-- Sin resultados tras filtrar -->
+          <div v-if="!registrosFiltrados.length" class="center-state no-records">
+            <ion-icon :icon="calendarOutline" class="state-icon" />
+            <p>Sin pesajes en ese rango de fechas</p>
           </div>
-          <div class="records-list">
-            <div
-              v-for="reg in historial"
-              :key="reg.id"
-              class="record-item"
-            >
-              <div class="record-left">
-                <p class="record-fecha">{{ formatFecha(reg.fecha) }}</p>
-                <p class="record-hora">{{ formatHora(reg.created_at) }}</p>
+
+          <template v-else>
+            <!-- Evolución de peso -->
+            <div v-if="chartData.length > 1">
+              <div class="section-title">
+                <h3>Evolución de Peso</h3>
               </div>
-              <div class="record-center">
-                <p class="record-peso">{{ pesoEfectivo(reg) }}<span class="kg-unit"> kg</span></p>
-                <p v-if="reg.peso_corregido !== null" class="record-estimado">
-                  Estimado: {{ reg.peso_estimado.toFixed(1) }} kg
-                </p>
+              <div class="chart-card">
+                <svg :viewBox="`0 0 ${LINE_W} ${LINE_H}`" class="line-svg">
+                  <!-- Grid lines + Y labels -->
+                  <g v-for="tick in lineTicks" :key="'g' + tick">
+                    <line
+                      :x1="LINE_PL" :y1="lineY(tick)"
+                      :x2="LINE_W - LINE_PR" :y2="lineY(tick)"
+                      stroke="#e5e5e5" stroke-width="1" stroke-dasharray="3 3"
+                    />
+                    <text
+                      :x="LINE_PL - 4" :y="lineY(tick) + 4"
+                      text-anchor="end" font-size="10" fill="#9ca3af"
+                    >{{ tick }}</text>
+                  </g>
+                  <defs>
+                    <linearGradient id="areaGrad" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0%" stop-color="#096A5E" stop-opacity="0.25" />
+                      <stop offset="100%" stop-color="#096A5E" stop-opacity="0" />
+                    </linearGradient>
+                  </defs>
+                  <!-- Eje X -->
+                  <line
+                    :x1="LINE_PL" :y1="LINE_PT + LINE_IH"
+                    :x2="LINE_W - LINE_PR" :y2="LINE_PT + LINE_IH"
+                    stroke="#e5e5e5" stroke-width="1"
+                  />
+                  <!-- Area fill -->
+                  <polygon :points="polygonPoints" fill="url(#areaGrad)" />
+                  <!-- Polyline -->
+                  <polyline
+                    :points="polylinePoints"
+                    fill="none" stroke="#096A5E" stroke-width="3"
+                    stroke-linecap="round" stroke-linejoin="round"
+                  />
+                  <!-- Data points -->
+                  <circle
+                    v-for="(p, i) in chartPoints" :key="i"
+                    :cx="p.x" :cy="p.y" r="5"
+                    fill="#096A5E" stroke="#fff" stroke-width="2"
+                  />
+                  <!-- X labels (first, last, and sparse middle) -->
+                  <text
+                    v-for="(p, i) in sparseLabels" :key="'xl' + i"
+                    :x="p.x" :y="LINE_H - LINE_PB + 14"
+                    text-anchor="middle" font-size="10" fill="#9ca3af"
+                  >{{ p.label }}</text>
+                </svg>
+                <div class="chart-footer">
+                  <span class="chart-min">Mín: {{ chartMin.toFixed(1) }} kg</span>
+                  <span class="chart-max">Máx: {{ chartMax.toFixed(1) }} kg</span>
+                </div>
               </div>
             </div>
-          </div>
+
+            <!-- Lista de registros -->
+            <div class="section-title">
+              <h3>Registros ({{ registrosFiltrados.length }})</h3>
+            </div>
+            <div class="records-list">
+              <div
+                v-for="reg in registrosFiltrados"
+                :key="reg.id"
+                class="record-item"
+              >
+                <div class="record-left">
+                  <p class="record-fecha">{{ formatFecha(reg.fecha) }}</p>
+                  <p class="record-hora">{{ formatHora(reg.created_at) }}</p>
+                </div>
+                <div class="record-right">
+                  <p class="record-peso">{{ pesoEfectivo(reg) }}<span class="kg-unit"> kg</span></p>
+                  <p v-if="esEstimado(reg)" class="record-ia-badge">
+                    <ion-icon :icon="sparklesOutline" />
+                    Estimado por IA
+                  </p>
+                  <p v-else-if="reg.peso_corregido !== null" class="record-estimado">
+                    Estimado: {{ Number(reg.peso_estimado).toFixed(1) }} kg
+                  </p>
+                </div>
+              </div>
+            </div>
+          </template>
         </template>
 
         <div style="height: 32px" />
@@ -144,7 +193,10 @@ import {
   IonButtons, IonButton, IonIcon, IonSpinner,
   IonRefresher, IonRefresherContent,
 } from '@ionic/vue'
-import { alertCircleOutline, pawOutline, scaleOutline } from 'ionicons/icons'
+import {
+  alertCircleOutline, pawOutline, scaleOutline,
+  calendarOutline, closeOutline, sparklesOutline,
+} from 'ionicons/icons'
 import { ref, computed, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
 import { getGanado, type Ganado } from '@/api/ganado'
@@ -166,6 +218,15 @@ const animal = ref<Ganado | null>(null)
 const historial = ref<RegistroPeso[]>([])
 const loading = ref(false)
 const error = ref<string | null>(null)
+
+const startDate = ref('')
+const endDate = ref('')
+const showDatePicker = ref(false)
+
+function limpiarFiltro() {
+  startDate.value = ''
+  endDate.value = ''
+}
 
 async function cargarDatos() {
   loading.value = true
@@ -196,8 +257,18 @@ async function handleRefresh(event: CustomEvent) {
   ;(event.target as HTMLIonRefresherElement).complete()
 }
 
+const registrosFiltrados = computed(() => {
+  if (!startDate.value && !endDate.value) return historial.value
+  return historial.value.filter((reg) => {
+    const fecha = parseFechaLocal(reg.fecha)
+    if (startDate.value && !endDate.value) return fecha >= parseFechaLocal(startDate.value)
+    if (!startDate.value && endDate.value) return fecha <= parseFechaLocal(endDate.value)
+    return fecha >= parseFechaLocal(startDate.value) && fecha <= parseFechaLocal(endDate.value)
+  })
+})
+
 const chartData = computed(() =>
-  [...historial.value]
+  [...registrosFiltrados.value]
     .sort((a, b) => new Date(a.fecha).getTime() - new Date(b.fecha).getTime())
     .slice(-12)
 )
@@ -265,11 +336,15 @@ const sparseLabels = computed(() => {
 })
 
 function pesoEfectivoNum(r: RegistroPeso): number {
-  return r.peso_corregido ?? r.peso_estimado
+  return Number(r.peso_corregido ?? r.peso_estimado)
 }
 
 function pesoEfectivo(r: RegistroPeso): string {
   return pesoEfectivoNum(r).toFixed(1)
+}
+
+function esEstimado(r: RegistroPeso): boolean {
+  return r.metodo !== 'manual'
 }
 
 const CR_TZ = 'America/Costa_Rica'
@@ -282,6 +357,12 @@ function parseFechaLocal(fecha: string): Date {
 function formatFecha(fecha: string): string {
   return parseFechaLocal(fecha).toLocaleDateString('es-CR', {
     day: '2-digit', month: 'short', year: 'numeric',
+  })
+}
+
+function formatFechaCorta(fecha: string): string {
+  return parseFechaLocal(fecha).toLocaleDateString('es-CR', {
+    day: '2-digit', month: '2-digit', year: 'numeric',
   })
 }
 
@@ -391,13 +472,74 @@ function formatHora(createdAt: string): string {
   gap: 10px;
 }
 
-.record-left { min-width: 76px; }
-.record-fecha { font-size: 12px; font-weight: 600; color: #333; margin: 0; }
+.record-left { flex: 1; min-width: 0; }
+.record-fecha { font-size: 13px; font-weight: 600; color: #333; margin: 0; }
 .record-hora { font-size: 10px; color: #bbb; margin: 2px 0 0; }
 
-.record-center { flex: 1; min-width: 0; }
-.record-peso { font-size: 18px; font-weight: 700; color: #006666; margin: 0; }
+.record-right { text-align: right; flex-shrink: 0; }
+.record-peso { font-size: 18px; font-weight: 700; color: #096A5E; margin: 0; }
 .kg-unit { font-size: 13px; font-weight: 400; color: #999; }
 .record-estimado { font-size: 11px; color: #aaa; margin: 2px 0 0; }
+.record-ia-badge {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 4px;
+  font-size: 11px;
+  color: #096A5E;
+  margin: 2px 0 0;
+}
+
+/* Filtro de fechas */
+.date-filter { margin: 16px 16px 0; }
+.date-filter-btn {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #fff;
+  border: none;
+  border-radius: 12px;
+  padding: 12px 14px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  color: #888;
+  font-size: 13px;
+}
+
+.date-filter-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.date-filter-left ion-icon {
+  font-size: 18px;
+}
+
+.date-filter-clear {
+  font-size: 16px;
+  color: #bbb;
+}
+
+.date-filter-panel {
+  margin-top: 8px;
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.date-filter-field { display: flex; flex-direction: column; gap: 4px; }
+.date-filter-field label { font-size: 12px; color: #666; font-weight: 600; }
+.date-filter-field input {
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  padding: 8px 10px;
+  font-size: 13px;
+  color: #333;
+}
 
 </style>

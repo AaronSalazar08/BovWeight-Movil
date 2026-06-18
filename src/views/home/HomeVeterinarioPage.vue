@@ -30,29 +30,101 @@
         </div>
       </div>
 
-      <!-- Fincas asignadas — módulo principal activo -->
-      <div class="section-title">
-        <h3>Mis Fincas Asignadas</h3>
+      <!-- Estadísticas -->
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-icon-wrap">
+            <ion-icon :icon="businessOutline" class="stat-icon" />
+          </div>
+          <p class="stat-value">{{ totalFincas }}</p>
+          <p class="stat-label">Fincas Asignadas</p>
+        </div>
+
+        <div class="stat-card">
+          <div class="stat-icon-wrap">
+            <ion-icon :icon="pawOutline" class="stat-icon" />
+          </div>
+          <p class="stat-value">{{ totalAnimales }}</p>
+          <p class="stat-label">Animales</p>
+        </div>
       </div>
 
-      <div class="modules-grid">
-        <button class="module-card primary-module" type="button" @click="goToFincasAsignadas">
-          <ion-icon :icon="businessOutline" class="module-icon" />
-          <p class="module-label">Fincas Asignadas</p>
-          <ion-badge color="tertiary" class="module-badge">Ver fincas</ion-badge>
+      <div class="weight-card">
+        <div class="weight-header">
+          <div class="stat-icon-wrap">
+            <ion-icon :icon="scaleOutline" class="stat-icon" />
+          </div>
+          <p class="weight-label">Peso Promedio</p>
+        </div>
+        <p class="weight-value">{{ pesoPromedio }}<span class="weight-unit"> kg</span></p>
+      </div>
+
+      <!-- Acceso rápido -->
+      <div class="section-title">
+        <h3>Acceso Rápido</h3>
+      </div>
+
+      <div class="quick-access">
+        <button class="quick-card" type="button" @click="goToFincasAsignadas">
+          <div class="quick-left">
+            <div class="quick-icon-wrap">
+              <ion-icon :icon="businessOutline" class="quick-icon" />
+            </div>
+            <div class="quick-text">
+              <p class="quick-title">Fincas Asignadas</p>
+              <p class="quick-subtitle">Ver fincas</p>
+            </div>
+          </div>
+          <ion-icon :icon="chevronForwardOutline" class="quick-chevron" />
         </button>
 
-        <button class="module-card" type="button" @click="goToGanado">
-          <ion-icon :icon="pawOutline" class="module-icon" />
-          <p class="module-label">Ganado</p>
-          <ion-badge color="tertiary" class="module-badge">Ver ganado</ion-badge>
+        <button class="quick-card" type="button" @click="goToGanado">
+          <div class="quick-left">
+            <div class="quick-icon-wrap">
+              <ion-icon :icon="pawOutline" class="quick-icon" />
+            </div>
+            <div class="quick-text">
+              <p class="quick-title">Ganado</p>
+              <p class="quick-subtitle">Ver ganado</p>
+            </div>
+          </div>
+          <ion-icon :icon="chevronForwardOutline" class="quick-chevron" />
         </button>
 
-        <button class="module-card" type="button" @click="goToHistorial">
-          <ion-icon :icon="barChartOutline" class="module-icon" />
-          <p class="module-label">Historial General</p>
-          <ion-badge color="tertiary" class="module-badge">Ver historial</ion-badge>
+        <button class="quick-card" type="button" @click="goToHistorial">
+          <div class="quick-left">
+            <div class="quick-icon-wrap">
+              <ion-icon :icon="barChartOutline" class="quick-icon" />
+            </div>
+            <div class="quick-text">
+              <p class="quick-title">Historial General</p>
+              <p class="quick-subtitle">Ver historial</p>
+            </div>
+          </div>
+          <ion-icon :icon="chevronForwardOutline" class="quick-chevron" />
         </button>
+      </div>
+
+      <!-- Actividad reciente -->
+      <div class="section-title">
+        <h3>Actividad Reciente</h3>
+      </div>
+
+      <div class="activity-card">
+        <div v-if="!recientes.length" class="activity-empty">
+          Aún no hay pesajes registrados.
+        </div>
+        <div v-else class="activity-row" v-for="reg in recientes" :key="reg.id">
+          <img v-if="reg.ganado.imagen" :src="reg.ganado.imagen" class="activity-thumb" :alt="reg.ganado.nombre ?? reg.ganado.arete" />
+          <div v-else class="activity-icon-wrap">
+            <ion-icon :icon="scaleOutline" class="activity-icon" />
+          </div>
+          <div class="activity-info">
+            <p class="activity-name">{{ reg.ganado.nombre ?? `Arete ${reg.ganado.arete}` }}</p>
+            <p class="activity-date">{{ formatFecha(reg.fecha) }}</p>
+          </div>
+          <p class="activity-weight">{{ pesoEfectivo(reg) }} kg</p>
+        </div>
       </div>
 
       <!-- Aviso legal -->
@@ -68,6 +140,7 @@
 </template>
 
 <script setup lang="ts">
+import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import {
   IonPage, IonHeader, IonToolbar, IonTitle, IonContent,
@@ -78,11 +151,56 @@ import {
 import {
   logOutOutline, medkitOutline, businessOutline,
   pawOutline, barChartOutline, informationCircleOutline,
+  scaleOutline, chevronForwardOutline,
 } from 'ionicons/icons'
 import { useAuthStore } from '@/stores/auth'
+import { getTodoElGanado, type Ganado } from '@/api/ganado'
+import { getFincas, type Finca } from '@/api/fincas'
+import { getPesajesRecientes, type RegistroPesoConGanado } from '@/api/reportes'
 
 const router = useRouter()
 const authStore = useAuthStore()
+
+const ganado = ref<Ganado[]>([])
+const fincas = ref<Finca[]>([])
+const recientes = ref<RegistroPesoConGanado[]>([])
+
+async function cargarDatos() {
+  try {
+    const [g, f, r] = await Promise.all([
+      getTodoElGanado(),
+      getFincas(),
+      getPesajesRecientes(5),
+    ])
+    ganado.value = g
+    fincas.value = f
+    recientes.value = r
+  } catch (e) {
+    console.error(e)
+  }
+}
+
+onMounted(cargarDatos)
+
+const totalAnimales = computed(() => ganado.value.length)
+const totalFincas = computed(() => fincas.value.length)
+
+const pesoPromedio = computed(() => {
+  const valid = ganado.value.filter(g => g.peso_kg && g.peso_kg > 0)
+  if (!valid.length) return '—'
+  return (valid.reduce((s, g) => s + (g.peso_kg ?? 0), 0) / valid.length).toFixed(1)
+})
+
+function pesoEfectivo(reg: RegistroPesoConGanado): string {
+  return Number(reg.peso_corregido ?? reg.peso_estimado).toFixed(1)
+}
+
+function formatFecha(fecha: string): string {
+  const [y, m, d] = fecha.substring(0, 10).split('-').map(Number)
+  return new Date(y, m - 1, d).toLocaleDateString('es-CR', {
+    day: '2-digit', month: 'short', year: 'numeric',
+  })
+}
 
 async function handleLogout() {
   const alert = await alertController.create({
@@ -104,7 +222,7 @@ async function handleLogout() {
 }
 
 async function handleRefresh(event: CustomEvent) {
-  await authStore.fetchCurrentUser()
+  await Promise.all([authStore.fetchCurrentUser(), cargarDatos()])
   ;(event.target as HTMLIonRefresherElement).complete()
 }
 
@@ -180,66 +298,230 @@ function goToHistorial() {
   margin: 0;
 }
 
-.modules-grid {
+/* Estadísticas */
+.stats-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 12px;
-  padding: 0 16px;
-  color: #1a1a1a;
+  padding: 16px 16px 0;
 }
 
-.module-card {
+.stat-card {
   background: #ffffff;
   border-radius: 14px;
-  padding: 20px 16px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 8px;
-  text-align: center;
+  padding: 16px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
-  cursor: pointer;
-  border: none;
-  transition: transform 0.15s ease;
 }
 
-.module-card:active {
-  transform: scale(0.96);
+.stat-icon-wrap {
+  display: inline-flex;
+  background: rgba(82, 96, 255, 0.1);
+  border-radius: 10px;
+  padding: 8px;
+  margin-bottom: 8px;
 }
 
-/* El módulo principal del vet tiene borde de acento */
-.module-card.primary-module {
-  border: 2px solid var(--ion-color-tertiary, #5260ff);
-  box-shadow: 0 4px 12px rgba(82, 96, 255, 0.15);
-}
-
-.module-card.primary-module .module-icon {
+.stat-icon {
+  font-size: 20px;
   color: var(--ion-color-tertiary, #5260ff);
 }
 
-.module-card.coming-soon {
-  opacity: 0.65;
-  cursor: default;
+.stat-value {
+  font-size: 24px;
+  font-weight: 700;
+  color: #1a1a1a;
+  margin: 0;
+  line-height: 1.1;
 }
 
-.module-card.coming-soon:active {
-  transform: none;
-}
-
-.module-icon {
-  font-size: 32px;
-  color: var(--ion-color-primary);
-}
-
-.module-label {
+.stat-label {
   font-size: 13px;
+  color: #888;
+  margin: 4px 0 0;
+}
+
+/* Peso promedio */
+.weight-card {
+  margin: 12px 16px 0;
+  background: #ffffff;
+  border-radius: 14px;
+  padding: 16px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+.weight-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.weight-label {
+  font-size: 14px;
+  font-weight: 600;
+  color: #444;
+  margin: 0;
+}
+
+.weight-value {
+  font-size: 30px;
+  font-weight: 700;
+  color: #1a1a1a;
+  margin: 0;
+}
+
+.weight-unit {
+  font-size: 16px;
+  font-weight: 400;
+  color: #999;
+}
+
+/* Acceso rápido */
+.quick-access {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 0 16px;
+}
+
+.quick-card {
+  background: #ffffff;
+  border-radius: 14px;
+  padding: 14px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  cursor: pointer;
+  border: none;
+  width: 100%;
+  transition: transform 0.15s ease;
+}
+
+.quick-card:active {
+  transform: scale(0.98);
+}
+
+.quick-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.quick-icon-wrap {
+  background: rgba(82, 96, 255, 0.1);
+  border-radius: 10px;
+  padding: 10px;
+  display: flex;
+}
+
+.quick-icon {
+  font-size: 22px;
+  color: var(--ion-color-tertiary, #5260ff);
+}
+
+.quick-text {
+  text-align: left;
+}
+
+.quick-title {
+  font-size: 14px;
   font-weight: 600;
   color: #333;
   margin: 0;
 }
 
-.module-badge {
-  font-size: 10px;
+.quick-subtitle {
+  font-size: 12px;
+  color: #888;
+  margin: 2px 0 0;
+}
+
+.quick-chevron {
+  font-size: 18px;
+  color: #ccc;
+  flex-shrink: 0;
+}
+
+/* Actividad reciente */
+.activity-card {
+  margin: 0 16px;
+  background: #ffffff;
+  border-radius: 14px;
+  padding: 8px 16px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+.activity-empty {
+  padding: 16px 0;
+  text-align: center;
+  font-size: 13px;
+  color: #aaa;
+}
+
+.activity-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 0;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.activity-row:last-child {
+  border-bottom: none;
+}
+
+.activity-thumb {
+  width: 44px;
+  height: 44px;
+  border-radius: 10px;
+  object-fit: cover;
+  flex-shrink: 0;
+}
+
+.activity-icon-wrap {
+  width: 44px;
+  height: 44px;
+  border-radius: 10px;
+  background: rgba(82, 96, 255, 0.1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.activity-icon {
+  font-size: 20px;
+  color: var(--ion-color-tertiary, #5260ff);
+}
+
+.activity-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.activity-name {
+  font-size: 13px;
+  font-weight: 600;
+  color: #333;
+  margin: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.activity-date {
+  font-size: 11px;
+  color: #aaa;
+  margin: 2px 0 0;
+}
+
+.activity-weight {
+  font-size: 14px;
+  font-weight: 600;
+  color: #1a1a1a;
+  margin: 0;
+  flex-shrink: 0;
 }
 
 .legal-notice {
