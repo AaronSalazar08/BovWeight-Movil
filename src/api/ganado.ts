@@ -66,6 +66,11 @@ export const registrarPeso = async (id: number, peso: number): Promise<void> => 
   await client.post(`/ganado/${id}/peso`, { peso })
 }
 
+export const actualizarEstadoSalud = async (id: number, estadoSaludId: number): Promise<Ganado> => {
+  const response = await client.patch(`/ganado/${id}/estado-salud`, { estado_salud_id: estadoSaludId })
+  return response.data.data
+}
+
 export const getEstadosSalud = async (): Promise<Catalogo[]> => {
   const response = await client.get('/catalogos/estados-salud')
   return response.data
