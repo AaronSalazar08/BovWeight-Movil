@@ -54,10 +54,13 @@ import {
 import { getFinca, getFincas, type Finca } from '@/api/fincas'
 import { exportarPDF, exportarExcel } from '@/utils/exportarGanado'
 import { estimarPesoDesdeImagen, type MLEstimacion, type MLMedidas } from '@/api/ml'
+import { usePermisosGanado } from '@/composables/usePermisosGanado'
 
 const route = useRoute()
 const router = useRouter()
 const fincaId = Number(route.params.fincaId)
+
+const { puedeAgregarGanado, puedeEditarCompleto } = usePermisosGanado()
 
 const finca = ref<Finca | null>(null)
 const fincas = ref<Finca[]>([])
@@ -405,7 +408,7 @@ onMounted(cargar)
             <ion-button slot="end" fill="outline" size="small" color="primary" @click.stop="seleccionarAnimal(animal)">
               Seleccionar
             </ion-button>
-            <ion-button slot="end" fill="clear" @click.stop="abrirOpciones(animal)">
+            <ion-button v-if="puedeEditarCompleto" slot="end" fill="clear" @click.stop="abrirOpciones(animal)">
               <ion-icon :icon="ellipsisVertical" />
             </ion-button>
           </template>
@@ -418,7 +421,7 @@ onMounted(cargar)
         <p class="empty-note">Pulsa el botón + para agregar uno.</p>
       </div>
 
-      <ion-fab v-if="!modoSeleccion" vertical="bottom" horizontal="end" slot="fixed">
+      <ion-fab v-if="!modoSeleccion && puedeAgregarGanado" vertical="bottom" horizontal="end" slot="fixed">
         <ion-fab-button @click="abrirModal">
           <ion-icon :icon="addOutline" />
         </ion-fab-button>
