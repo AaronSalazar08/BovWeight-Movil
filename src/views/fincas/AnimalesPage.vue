@@ -182,8 +182,9 @@ async function cargar() {
     fincas.value = fs
     estadosSalud.value = es
     estadosComerciales.value = ec
-  } catch (e) {
+  } catch (e: any) {
     console.error(e)
+    toast.error(e?.response?.data?.message ?? t('common.loadErrorToast'))
   } finally {
     loading.value = false
   }
@@ -358,8 +359,9 @@ async function guardar() {
     }
     showModal.value = false
     await cargar()
-  } catch (e) {
+  } catch (e: any) {
     console.error(e)
+    toast.error(e?.response?.data?.message ?? t('common.saveErrorToast'))
   }
 }
 

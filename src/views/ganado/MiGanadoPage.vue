@@ -36,10 +36,12 @@ import {
 import { getFincas, type Finca } from '@/api/fincas'
 import { exportarPDF, exportarExcel } from '@/utils/exportarGanado'
 import { usePermisosGanado } from '@/composables/usePermisosGanado'
+import { useToast } from '@/composables/useToast'
 import { useI18n } from 'vue-i18n'
 
 const router = useRouter()
 const { puedeEditarCompleto } = usePermisosGanado()
+const toast = useToast()
 const { t } = useI18n()
 
 const animales = ref<Ganado[]>([])
@@ -132,8 +134,9 @@ async function cargar() {
     animales.value = g
     fincas.value = fs
     estadosComerciales.value = ec
-  } catch (e) {
+  } catch (e: any) {
     console.error(e)
+    toast.error(e?.response?.data?.message ?? t('common.loadErrorToast'))
   } finally {
     loading.value = false
   }
@@ -164,8 +167,9 @@ async function guardar() {
     })
     showModal.value = false
     await cargar()
-  } catch (e) {
+  } catch (e: any) {
     console.error(e)
+    toast.error(e?.response?.data?.message ?? t('common.saveErrorToast'))
   }
 }
 

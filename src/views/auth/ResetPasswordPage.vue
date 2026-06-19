@@ -85,10 +85,6 @@
               {{ isLoading ? t('auth.resetPassword.submitting') : t('auth.resetPassword.submit') }}
             </ion-button>
           </form>
-
-          <ion-button fill="clear" expand="block" router-link="/forgot-password" replace class="back-btn">
-            {{ t('auth.resetPassword.requestNewLink') }}
-          </ion-button>
         </div>
 
         <!-- Estado: éxito -->
@@ -327,11 +323,6 @@ async function handleReset() {
   --border-radius: 10px;
   height: 48px;
   font-weight: 600;
-}
-
-.back-btn {
-  margin-top: 4px;
-  font-size: 14px;
 }
 
 /* Estado éxito */
