@@ -453,7 +453,7 @@ function goToReportes() {
 
 <style scoped>
 .home-content {
-  --background: #f0f4f8;
+  --background: var(--ion-background-color);
 }
 
 .welcome-section {
@@ -506,7 +506,7 @@ function goToReportes() {
 .section-title h3 {
   font-size: 16px;
   font-weight: 600;
-  color: #333;
+  color: var(--bov-text-strong);
   margin: 0;
 }
 
@@ -519,15 +519,15 @@ function goToReportes() {
 }
 
 .stat-card {
-  background: #ffffff;
+  background: var(--bov-surface);
   border-radius: 14px;
   padding: 16px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  box-shadow: 0 2px 8px var(--bov-shadow);
 }
 
 .stat-icon-wrap {
   display: inline-flex;
-  background: rgba(0, 128, 128, 0.1);
+  background: var(--bov-tint-soft);
   border-radius: 10px;
   padding: 8px;
   margin-bottom: 8px;
@@ -541,24 +541,24 @@ function goToReportes() {
 .stat-value {
   font-size: 24px;
   font-weight: 700;
-  color: #1a1a1a;
+  color: var(--bov-text-strong);
   margin: 0;
   line-height: 1.1;
 }
 
 .stat-label {
   font-size: 13px;
-  color: #888;
+  color: var(--bov-text-muted);
   margin: 4px 0 0;
 }
 
 /* Peso promedio */
 .weight-card {
   margin: 12px 16px 0;
-  background: #ffffff;
+  background: var(--bov-surface);
   border-radius: 14px;
   padding: 16px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  box-shadow: 0 2px 8px var(--bov-shadow);
 }
 
 .weight-header {
@@ -571,21 +571,21 @@ function goToReportes() {
 .weight-label {
   font-size: 14px;
   font-weight: 600;
-  color: #444;
+  color: var(--bov-text-strong);
   margin: 0;
 }
 
 .weight-value {
   font-size: 30px;
   font-weight: 700;
-  color: #1a1a1a;
+  color: var(--bov-text-strong);
   margin: 0;
 }
 
 .weight-unit {
   font-size: 16px;
   font-weight: 400;
-  color: #999;
+  color: var(--bov-text-muted);
 }
 
 /* Acceso rápido */
@@ -597,13 +597,13 @@ function goToReportes() {
 }
 
 .quick-card {
-  background: #ffffff;
+  background: var(--bov-surface);
   border-radius: 14px;
   padding: 14px 16px;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  box-shadow: 0 2px 8px var(--bov-shadow);
   cursor: pointer;
   border: none;
   width: 100%;
@@ -621,7 +621,7 @@ function goToReportes() {
 }
 
 .quick-icon-wrap {
-  background: rgba(0, 128, 128, 0.1);
+  background: var(--bov-tint-soft);
   border-radius: 10px;
   padding: 10px;
   display: flex;
@@ -639,36 +639,36 @@ function goToReportes() {
 .quick-title {
   font-size: 14px;
   font-weight: 600;
-  color: #333;
+  color: var(--bov-text-strong);
   margin: 0;
 }
 
 .quick-subtitle {
   font-size: 12px;
-  color: #888;
+  color: var(--bov-text-muted);
   margin: 2px 0 0;
 }
 
 .quick-chevron {
   font-size: 18px;
-  color: #ccc;
+  color: var(--bov-text-faint);
   flex-shrink: 0;
 }
 
 /* Actividad reciente */
 .activity-card {
   margin: 0 16px;
-  background: #ffffff;
+  background: var(--bov-surface);
   border-radius: 14px;
   padding: 8px 16px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  box-shadow: 0 2px 8px var(--bov-shadow);
 }
 
 .activity-empty {
   padding: 16px 0;
   text-align: center;
   font-size: 13px;
-  color: #aaa;
+  color: var(--bov-text-muted);
 }
 
 .activity-row {
@@ -676,7 +676,7 @@ function goToReportes() {
   align-items: center;
   gap: 12px;
   padding: 12px 0;
-  border-bottom: 1px solid #f0f0f0;
+  border-bottom: 1px solid var(--bov-border);
 }
 
 .activity-row:last-child {
@@ -695,7 +695,7 @@ function goToReportes() {
   width: 44px;
   height: 44px;
   border-radius: 10px;
-  background: rgba(0, 128, 128, 0.1);
+  background: var(--bov-tint-soft);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -715,7 +715,7 @@ function goToReportes() {
 .activity-name {
   font-size: 13px;
   font-weight: 600;
-  color: #333;
+  color: var(--bov-text-strong);
   margin: 0;
   white-space: nowrap;
   overflow: hidden;
@@ -724,14 +724,14 @@ function goToReportes() {
 
 .activity-date {
   font-size: 11px;
-  color: #aaa;
+  color: var(--bov-text-muted);
   margin: 2px 0 0;
 }
 
 .activity-weight {
   font-size: 14px;
   font-weight: 600;
-  color: #1a1a1a;
+  color: var(--bov-text-strong);
   margin: 0;
   flex-shrink: 0;
 }
@@ -741,11 +741,11 @@ function goToReportes() {
   align-items: flex-start;
   gap: 10px;
   margin: 20px 16px 32px;
-  background: #fff8e1;
-  border: 1px solid #ffe082;
+  background: var(--bov-warning-soft-bg);
+  border: 1px solid var(--bov-warning-soft-border);
   border-radius: 10px;
   padding: 12px 14px;
-  color: #795548;
+  color: var(--bov-warning-soft-text);
   font-size: 12px;
   line-height: 1.5;
 }
@@ -754,7 +754,7 @@ function goToReportes() {
   font-size: 18px;
   flex-shrink: 0;
   margin-top: 1px;
-  color: #f57c00;
+  color: var(--bov-warning-soft-icon);
 }
 
 .legal-notice p {
@@ -763,7 +763,7 @@ function goToReportes() {
 
 .modal-content { --padding-top: 16px; }
 .form-group { margin-bottom: 16px; }
-.form-label { display: block; font-size: 0.9rem; font-weight: 600; color: var(--ion-color-dark); margin-bottom: 6px; }
+.form-label { display: block; font-size: 0.9rem; font-weight: 600; color: var(--bov-text-strong); margin-bottom: 6px; }
 .form-select { --border-radius: 10px; width: 100%; }
 .modal-actions { display: flex; flex-direction: column; gap: 8px; margin-top: 24px; }
 
@@ -795,7 +795,7 @@ function goToReportes() {
 .ml-peso {
   font-size: 1.2rem;
   font-weight: 700;
-  color: var(--ion-color-dark);
+  color: var(--bov-text-strong);
 }
 
 .ml-rango {
@@ -819,7 +819,7 @@ function goToReportes() {
 
 .ml-medidas {
   margin-top: 8px;
-  border-top: 1px solid rgba(0,0,0,0.08);
+  border-top: 1px solid var(--bov-border);
   padding-top: 8px;
 }
 
@@ -831,5 +831,5 @@ function goToReportes() {
 }
 
 .ml-medida-label { color: var(--ion-color-medium); }
-.ml-medida-valor { font-weight: 600; color: var(--ion-color-dark); }
+.ml-medida-valor { font-weight: 600; color: var(--bov-text-strong); }
 </style>

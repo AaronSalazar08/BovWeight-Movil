@@ -582,19 +582,19 @@ onMounted(() => {
 
 <style scoped>
 .fincas-content {
-  --background: #f0f4f8;
+  --background: var(--ion-background-color);
 }
 
 .modal-content {
-  --background: #ffffff;
-  --color: #1a1a1a;
-  --ion-item-background: #ffffff;
+  --background: var(--bov-surface);
+  --color: var(--bov-text-strong);
+  --ion-item-background: var(--bov-surface);
 }
 </style><style scoped>
-/* Fuerza fondo claro en el contenedor de la lista para que no aparezcan
-   barras negras entre los items cuando el sistema está en modo oscuro. */
+/* Fondo del contenedor de la lista igual al fondo de página, para que no
+   aparezcan barras de otro color entre los items "inset". */
 ion-list {
-  background: #f0f4f8;
+  background: var(--ion-background-color);
 }
 
 .list-header {
@@ -609,9 +609,9 @@ ion-list {
 }
 
 .searchbar {
-  --background: #ffffff;
-  --color: #1a1a1a;
-  --icon-color: #555555;
+  --background: var(--bov-surface);
+  --color: var(--bov-text-strong);
+  --icon-color: var(--bov-text-muted);
   --placeholder-color: #9e9e9e;
   --border-radius: 10px;
   --padding-start: 6px;
@@ -622,8 +622,8 @@ ion-list {
 .finca-item {
   margin-bottom: 12px;
   border-radius: 12px;
-  --background: #fbfbfb;
-  box-shadow: 0 6px 18px rgba(17,17,17,0.04);
+  --background: var(--bov-surface);
+  box-shadow: 0 6px 18px var(--bov-shadow);
   --padding-top: 10px;
   --padding-bottom: 10px;
   align-items: center;

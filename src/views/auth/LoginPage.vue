@@ -211,15 +211,15 @@ async function handleLogin() {
 }
 
 .login-card {
-  background: #ffffff;
+  background: var(--bov-surface);
   border-radius: 20px;
   padding: 28px 24px;
   width: 100%;
   max-width: 400px;
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
-  color: #1a1a1a;
-  --ion-text-color: #1a1a1a;
-  --color: #1a1a1a;
+  color: var(--bov-text-strong);
+  --ion-text-color: var(--bov-text-strong);
+  --color: var(--bov-text-strong);
 }
 
 .login-card * {
@@ -230,7 +230,7 @@ async function handleLogin() {
 .form-title {
   font-size: 20px;
   font-weight: 600;
-  color: #1a1a1a;
+  color: var(--bov-text-strong);
   margin: 0 0 24px;
   text-align: center;
 }
@@ -249,8 +249,8 @@ async function handleLogin() {
   display: flex;
   align-items: center;
   gap: 8px;
-  background: #fef2f2;
-  border: 1px solid #fecaca;
+  background: var(--bov-danger-soft-bg);
+  border: 1px solid var(--bov-danger-soft-border);
   border-radius: 8px;
   padding: 10px 12px;
   margin-bottom: 16px;

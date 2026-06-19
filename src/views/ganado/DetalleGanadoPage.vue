@@ -495,7 +495,7 @@ onMounted(cargar)
 
 <style scoped>
 .wrap {
-  background: #f0f4f8;
+  background: var(--ion-background-color);
   min-height: 100%;
 }
 
@@ -542,8 +542,8 @@ onMounted(cargar)
   position: absolute;
   top: 14px;
   left: 14px;
-  background: #ffffff;
-  color: #2e7d32;
+  background: var(--bov-surface);
+  color: var(--bov-success-soft-text);
   font-size: 0.72rem;
   font-weight: 700;
   text-transform: uppercase;
@@ -581,7 +581,7 @@ onMounted(cargar)
   align-items: center;
   gap: 14px;
   margin: 0 16px;
-  background: #e7f5e9;
+  background: var(--bov-success-soft-bg);
   border-radius: 16px;
   padding: 16px 18px;
 }
@@ -590,7 +590,7 @@ onMounted(cargar)
   width: 46px;
   height: 46px;
   border-radius: 12px;
-  background: #ffffff;
+  background: var(--bov-surface);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -599,19 +599,19 @@ onMounted(cargar)
 
 .peso-icono ion-icon {
   font-size: 24px;
-  color: #2e7d32;
+  color: var(--bov-success-soft-text);
 }
 
 .peso-label {
   font-size: 0.82rem;
-  color: #4caf50;
+  color: var(--bov-success-soft-text);
   font-weight: 600;
 }
 
 .peso-valor {
   font-size: 1.9rem;
   font-weight: 800;
-  color: #1b5e20;
+  color: var(--bov-success-soft-text);
   line-height: 1.1;
 }
 
@@ -644,7 +644,7 @@ onMounted(cargar)
 .info-valor {
   font-size: 1.15rem;
   font-weight: 700;
-  color: var(--ion-color-dark);
+  color: var(--bov-text-strong);
   margin-bottom: 8px;
 }
 
@@ -693,7 +693,7 @@ onMounted(cargar)
 /* MODAL */
 .modal-content { --padding-top: 16px; }
 .form-group { margin-bottom: 16px; }
-.form-label { display: block; font-size: 0.9rem; font-weight: 600; color: var(--ion-color-dark); margin-bottom: 6px; }
+.form-label { display: block; font-size: 0.9rem; font-weight: 600; color: var(--bov-text-strong); margin-bottom: 6px; }
 .form-input, .form-select { --border-radius: 10px; width: 100%; }
 .modal-actions { display: flex; flex-direction: column; gap: 8px; margin-top: 24px; }
 
@@ -703,7 +703,7 @@ onMounted(cargar)
 .foto-anotada { width: 100%; border-radius: 8px; margin-bottom: 10px; border: 2px solid #00c84a; }
 
 .ml-resultado { margin-top: 10px; padding: 12px 14px; background: var(--ion-color-tertiary-tint, #f0eaff); border-radius: 10px; border-left: 4px solid var(--ion-color-tertiary, #7044ff); }
-.ml-peso { font-size: 1.2rem; font-weight: 700; color: var(--ion-color-dark); }
+.ml-peso { font-size: 1.2rem; font-weight: 700; color: var(--bov-text-strong); }
 .ml-rango { font-size: 0.82rem; color: var(--ion-color-medium); margin-top: 2px; }
 .ml-advertencia { font-size: 0.78rem; color: var(--ion-color-warning-shade, #b7660a); margin-top: 6px; }
 </style>

@@ -154,7 +154,7 @@ async function handleLogout() {
 
 <style scoped>
 .perfil-content {
-  --background: #f0f4f8;
+  --background: var(--ion-background-color);
 }
 
 .profile-header {
@@ -185,27 +185,27 @@ async function handleLogout() {
 .profile-name {
   font-size: 22px;
   font-weight: 700;
-  color: #1a1a1a;
+  color: var(--bov-text-strong);
   margin: 0;
   text-align: center;
 }
 
 .info-list {
   margin-top: 8px;
-  --color: #1a1a1a;
-  --ion-text-color: #1a1a1a;
-  --ion-item-background: #ffffff;
+  --color: var(--bov-text-strong);
+  --ion-text-color: var(--bov-text-strong);
+  --ion-item-background: var(--bov-surface);
 }
 
 .info-list ion-item h3 {
   font-size: 15px;
   font-weight: 500;
-  color: #000000;
+  color: var(--bov-text-strong);
 }
 
 .info-list ion-item p {
   font-size: 12px;
-  color: #555555;
+  color: var(--bov-text-muted);
 }
 
 .legal-notice {
@@ -213,11 +213,11 @@ async function handleLogout() {
   align-items: flex-start;
   gap: 10px;
   margin: 8px 16px 32px;
-  background: #fff8e1;
-  border: 1px solid #ffe082;
+  background: var(--bov-warning-soft-bg);
+  border: 1px solid var(--bov-warning-soft-border);
   border-radius: 10px;
   padding: 12px 14px;
-  color: #795548;
+  color: var(--bov-warning-soft-text);
   font-size: 12px;
   line-height: 1.5;
 }
@@ -226,7 +226,7 @@ async function handleLogout() {
   font-size: 18px;
   flex-shrink: 0;
   margin-top: 1px;
-  color: #f57c00;
+  color: var(--bov-warning-soft-icon);
 }
 
 .legal-notice p {

@@ -226,16 +226,16 @@ async function handleReset() {
 
 <style scoped>
 .reset-content {
-  --background: #f5f7fa;
+  --background: var(--ion-background-color);
 }
 
 .reset-wrapper {
   padding: 32px 20px;
   max-width: 480px;
   margin: 0 auto;
-  color: #1a1a1a;
-  --ion-text-color: #1a1a1a;
-  --color: #1a1a1a;
+  color: var(--bov-text-strong);
+  --ion-text-color: var(--bov-text-strong);
+  --color: var(--bov-text-strong);
 }
 
 .page-header {
@@ -247,7 +247,7 @@ async function handleReset() {
   width: 72px;
   height: 72px;
   border-radius: 50%;
-  background: #e8f5e9;
+  background: var(--bov-success-soft-bg);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -262,13 +262,13 @@ async function handleReset() {
 .page-header h2 {
   font-size: 22px;
   font-weight: 700;
-  color: #1a1a1a;
+  color: var(--bov-text-strong);
   margin: 0 0 10px;
 }
 
 .page-header p {
   font-size: 13px;
-  color: #666;
+  color: var(--bov-text-muted);
   line-height: 1.6;
   margin: 0;
 }
@@ -293,7 +293,7 @@ async function handleReset() {
   flex: 1;
   height: 4px;
   border-radius: 2px;
-  background: #e0e0e0;
+  background: var(--bov-track-bg);
   transition: background 0.3s;
 }
 
@@ -304,7 +304,7 @@ async function handleReset() {
 
 .strength-label {
   font-size: 12px;
-  color: #888;
+  color: var(--bov-text-muted);
   margin: 2px 0 16px;
   text-align: right;
 }
@@ -313,8 +313,8 @@ async function handleReset() {
   display: flex;
   align-items: center;
   gap: 8px;
-  background: #fef2f2;
-  border: 1px solid #fecaca;
+  background: var(--bov-danger-soft-bg);
+  border: 1px solid var(--bov-danger-soft-border);
   border-radius: 8px;
   padding: 10px 12px;
   margin-bottom: 16px;
@@ -343,7 +343,7 @@ async function handleReset() {
   width: 80px;
   height: 80px;
   border-radius: 50%;
-  background: #e8f5e9;
+  background: var(--bov-success-soft-bg);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -358,13 +358,13 @@ async function handleReset() {
 .success-state h2 {
   font-size: 22px;
   font-weight: 700;
-  color: #1a1a1a;
+  color: var(--bov-text-strong);
   margin: 0 0 12px;
 }
 
 .success-state p {
   font-size: 14px;
-  color: #666;
+  color: var(--bov-text-muted);
   line-height: 1.6;
   margin: 0 0 28px;
 }

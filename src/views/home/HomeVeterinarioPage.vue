@@ -244,7 +244,7 @@ function goToHistorial() {
 
 <style scoped>
 .home-content {
-  --background: #f0f4f8;
+  --background: var(--ion-background-color);
 }
 
 .welcome-section {
@@ -297,7 +297,7 @@ function goToHistorial() {
 .section-title h3 {
   font-size: 16px;
   font-weight: 600;
-  color: #333;
+  color: var(--bov-text-strong);
   margin: 0;
 }
 
@@ -310,10 +310,10 @@ function goToHistorial() {
 }
 
 .stat-card {
-  background: #ffffff;
+  background: var(--bov-surface);
   border-radius: 14px;
   padding: 16px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  box-shadow: 0 2px 8px var(--bov-shadow);
 }
 
 .stat-icon-wrap {
@@ -332,24 +332,24 @@ function goToHistorial() {
 .stat-value {
   font-size: 24px;
   font-weight: 700;
-  color: #1a1a1a;
+  color: var(--bov-text-strong);
   margin: 0;
   line-height: 1.1;
 }
 
 .stat-label {
   font-size: 13px;
-  color: #888;
+  color: var(--bov-text-muted);
   margin: 4px 0 0;
 }
 
 /* Peso promedio */
 .weight-card {
   margin: 12px 16px 0;
-  background: #ffffff;
+  background: var(--bov-surface);
   border-radius: 14px;
   padding: 16px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  box-shadow: 0 2px 8px var(--bov-shadow);
 }
 
 .weight-header {
@@ -362,21 +362,21 @@ function goToHistorial() {
 .weight-label {
   font-size: 14px;
   font-weight: 600;
-  color: #444;
+  color: var(--bov-text-strong);
   margin: 0;
 }
 
 .weight-value {
   font-size: 30px;
   font-weight: 700;
-  color: #1a1a1a;
+  color: var(--bov-text-strong);
   margin: 0;
 }
 
 .weight-unit {
   font-size: 16px;
   font-weight: 400;
-  color: #999;
+  color: var(--bov-text-muted);
 }
 
 /* Acceso rápido */
@@ -388,13 +388,13 @@ function goToHistorial() {
 }
 
 .quick-card {
-  background: #ffffff;
+  background: var(--bov-surface);
   border-radius: 14px;
   padding: 14px 16px;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  box-shadow: 0 2px 8px var(--bov-shadow);
   cursor: pointer;
   border: none;
   width: 100%;
@@ -430,36 +430,36 @@ function goToHistorial() {
 .quick-title {
   font-size: 14px;
   font-weight: 600;
-  color: #333;
+  color: var(--bov-text-strong);
   margin: 0;
 }
 
 .quick-subtitle {
   font-size: 12px;
-  color: #888;
+  color: var(--bov-text-muted);
   margin: 2px 0 0;
 }
 
 .quick-chevron {
   font-size: 18px;
-  color: #ccc;
+  color: var(--bov-text-faint);
   flex-shrink: 0;
 }
 
 /* Actividad reciente */
 .activity-card {
   margin: 0 16px;
-  background: #ffffff;
+  background: var(--bov-surface);
   border-radius: 14px;
   padding: 8px 16px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  box-shadow: 0 2px 8px var(--bov-shadow);
 }
 
 .activity-empty {
   padding: 16px 0;
   text-align: center;
   font-size: 13px;
-  color: #aaa;
+  color: var(--bov-text-muted);
 }
 
 .activity-row {
@@ -467,7 +467,7 @@ function goToHistorial() {
   align-items: center;
   gap: 12px;
   padding: 12px 0;
-  border-bottom: 1px solid #f0f0f0;
+  border-bottom: 1px solid var(--bov-border);
 }
 
 .activity-row:last-child {
@@ -506,7 +506,7 @@ function goToHistorial() {
 .activity-name {
   font-size: 13px;
   font-weight: 600;
-  color: #333;
+  color: var(--bov-text-strong);
   margin: 0;
   white-space: nowrap;
   overflow: hidden;
@@ -515,14 +515,14 @@ function goToHistorial() {
 
 .activity-date {
   font-size: 11px;
-  color: #aaa;
+  color: var(--bov-text-muted);
   margin: 2px 0 0;
 }
 
 .activity-weight {
   font-size: 14px;
   font-weight: 600;
-  color: #1a1a1a;
+  color: var(--bov-text-strong);
   margin: 0;
   flex-shrink: 0;
 }
@@ -532,11 +532,11 @@ function goToHistorial() {
   align-items: flex-start;
   gap: 10px;
   margin: 20px 16px 32px;
-  background: #fff8e1;
-  border: 1px solid #ffe082;
+  background: var(--bov-warning-soft-bg);
+  border: 1px solid var(--bov-warning-soft-border);
   border-radius: 10px;
   padding: 12px 14px;
-  color: #795548;
+  color: var(--bov-warning-soft-text);
   font-size: 12px;
   line-height: 1.5;
 }
@@ -545,7 +545,7 @@ function goToHistorial() {
   font-size: 18px;
   flex-shrink: 0;
   margin-top: 1px;
-  color: #f57c00;
+  color: var(--bov-warning-soft-icon);
 }
 
 .legal-notice p {

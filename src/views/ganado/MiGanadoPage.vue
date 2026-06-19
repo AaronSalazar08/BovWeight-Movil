@@ -351,18 +351,18 @@ onMounted(cargar)
 .animal-item {
   margin-bottom: 8px;
   border-radius: 12px;
-  --background: #fff;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+  --background: var(--bov-surface);
+  box-shadow: 0 2px 8px var(--bov-shadow);
   --padding-top: 10px;
   --padding-bottom: 10px;
 }
 
 .item-seleccionado {
-  --background: #e8f5e9;
+  --background: var(--bov-success-soft-bg);
 }
 
 .animal-icon { font-size: 28px; color: var(--ion-color-medium); }
-.animal-arete { font-weight: 700; font-size: 1rem; color: var(--ion-color-dark); }
+.animal-arete { font-weight: 700; font-size: 1rem; color: var(--bov-text-strong); }
 .animal-nombre { font-size: 0.85rem; color: var(--ion-color-medium); margin-top: 2px; }
 .animal-finca { font-size: 0.78rem; color: var(--ion-color-primary); margin-top: 2px; }
 .empty-state { text-align: center; padding: 48px 16px; color: var(--ion-color-medium); }
@@ -381,13 +381,13 @@ onMounted(cargar)
 
 .export-bar {
   padding: 12px 16px;
-  background: #fff;
+  background: var(--bov-surface);
   border-top: 1px solid var(--ion-color-light-shade);
 }
 
 .modal-content { --padding-top: 16px; }
 .form-group { margin-bottom: 16px; }
-.form-label { display: block; font-size: 0.9rem; font-weight: 600; color: var(--ion-color-dark); margin-bottom: 6px; }
+.form-label { display: block; font-size: 0.9rem; font-weight: 600; color: var(--bov-text-strong); margin-bottom: 6px; }
 .form-input, .form-select { --border-radius: 10px; width: 100%; }
 .modal-actions { display: flex; flex-direction: column; gap: 8px; margin-top: 24px; }
 ion-button { --border-radius: 10px; }

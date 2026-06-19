@@ -389,7 +389,7 @@ function formatHora(createdAt: string): string {
 </script>
 
 <style scoped>
-.historial-content { --background: #f0f4f8; }
+.historial-content { --background: var(--ion-background-color); }
 
 /* Center state */
 .center-state {
@@ -399,14 +399,14 @@ function formatHora(createdAt: string): string {
   justify-content: center;
   padding: 60px 24px;
   gap: 14px;
-  color: #888;
+  color: var(--bov-text-muted);
   font-size: 14px;
   text-align: center;
 }
 .center-state.no-records { padding: 40px 24px; }
-.state-icon { font-size: 42px; color: #ccc; }
+.state-icon { font-size: 42px; color: var(--bov-text-faint); }
 .state-icon.error { color: #e53935; }
-.no-records-sub { font-size: 12px; color: #bbb; margin: 0; }
+.no-records-sub { font-size: 12px; color: var(--bov-text-muted); margin: 0; }
 
 /* Animal card */
 .animal-card {
@@ -447,15 +447,15 @@ function formatHora(createdAt: string): string {
 
 /* Section title */
 .section-title { padding: 20px 16px 8px; }
-.section-title h3 { font-size: 15px; font-weight: 600; color: #333; margin: 0; }
+.section-title h3 { font-size: 15px; font-weight: 600; color: var(--bov-text-strong); margin: 0; }
 
 /* Line chart */
 .chart-card {
   margin: 0 16px;
-  background: #fff;
+  background: var(--bov-surface);
   border-radius: 14px;
   padding: 16px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  box-shadow: 0 2px 8px var(--bov-shadow);
 }
 .line-svg { display: block; width: 100%; height: 160px; }
 .chart-footer {
@@ -463,7 +463,7 @@ function formatHora(createdAt: string): string {
   justify-content: space-between;
   padding-top: 8px;
   font-size: 11px;
-  color: #aaa;
+  color: var(--bov-text-muted);
 }
 
 /* Records list */
@@ -471,8 +471,8 @@ function formatHora(createdAt: string): string {
 .record-item {
   margin-bottom: 8px;
   border-radius: 12px;
-  background: #fff;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  background: var(--bov-surface);
+  box-shadow: 0 2px 8px var(--bov-shadow);
   padding: 12px 16px;
   display: flex;
   align-items: center;
@@ -480,20 +480,20 @@ function formatHora(createdAt: string): string {
 }
 
 .record-left { flex: 1; min-width: 0; }
-.record-fecha { font-size: 13px; font-weight: 600; color: #333; margin: 0; }
-.record-hora { font-size: 10px; color: #bbb; margin: 2px 0 0; }
+.record-fecha { font-size: 13px; font-weight: 600; color: var(--bov-text-strong); margin: 0; }
+.record-hora { font-size: 10px; color: var(--bov-text-muted); margin: 2px 0 0; }
 
 .record-right { text-align: right; flex-shrink: 0; }
-.record-peso { font-size: 18px; font-weight: 700; color: #096A5E; margin: 0; }
-.kg-unit { font-size: 13px; font-weight: 400; color: #999; }
-.record-estimado { font-size: 11px; color: #aaa; margin: 2px 0 0; }
+.record-peso { font-size: 18px; font-weight: 700; color: var(--ion-color-primary); margin: 0; }
+.kg-unit { font-size: 13px; font-weight: 400; color: var(--bov-text-muted); }
+.record-estimado { font-size: 11px; color: var(--bov-text-muted); margin: 2px 0 0; }
 .record-ia-badge {
   display: flex;
   align-items: center;
   justify-content: flex-end;
   gap: 4px;
   font-size: 11px;
-  color: #096A5E;
+  color: var(--ion-color-primary);
   margin: 2px 0 0;
 }
 
@@ -504,12 +504,12 @@ function formatHora(createdAt: string): string {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  background: #fff;
+  background: var(--bov-surface);
   border: none;
   border-radius: 12px;
   padding: 12px 14px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
-  color: #888;
+  box-shadow: 0 2px 8px var(--bov-shadow);
+  color: var(--bov-text-muted);
   font-size: 13px;
 }
 
@@ -525,14 +525,14 @@ function formatHora(createdAt: string): string {
 
 .date-filter-clear {
   font-size: 16px;
-  color: #bbb;
+  color: var(--bov-text-muted);
 }
 
 .date-filter-panel {
   margin-top: 8px;
-  background: #fff;
+  background: var(--bov-surface);
   border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  box-shadow: 0 2px 8px var(--bov-shadow);
   padding: 14px;
   display: flex;
   flex-direction: column;
@@ -540,13 +540,13 @@ function formatHora(createdAt: string): string {
 }
 
 .date-filter-field { display: flex; flex-direction: column; gap: 4px; }
-.date-filter-field label { font-size: 12px; color: #666; font-weight: 600; }
+.date-filter-field label { font-size: 12px; color: var(--bov-text-muted); font-weight: 600; }
 .date-filter-field input {
-  border: 1px solid #e0e0e0;
+  border: 1px solid var(--bov-border);
   border-radius: 8px;
   padding: 8px 10px;
   font-size: 13px;
-  color: #333;
+  color: var(--bov-text-strong);
 }
 
 </style>
