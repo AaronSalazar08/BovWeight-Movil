@@ -36,9 +36,11 @@ import {
 import { getFincas, type Finca } from '@/api/fincas'
 import { exportarPDF, exportarExcel } from '@/utils/exportarGanado'
 import { usePermisosGanado } from '@/composables/usePermisosGanado'
+import { useI18n } from 'vue-i18n'
 
 const router = useRouter()
 const { puedeEditarCompleto } = usePermisosGanado()
+const { t } = useI18n()
 
 const animales = ref<Ganado[]>([])
 const fincas = ref<Finca[]>([])
@@ -103,17 +105,17 @@ async function abrirExportar() {
     : filtrados.value
 
   const sheet = await actionSheetController.create({
-    header: `Exportar ${lista.length} animal${lista.length !== 1 ? 'es' : ''}`,
+    header: t(lista.length !== 1 ? 'animales.exportHeaderPlural' : 'animales.exportHeaderSingular', { count: lista.length }),
     buttons: [
       {
-        text: 'Exportar PDF',
+        text: t('animales.exportPdf'),
         handler: () => { exportarPDF(lista, 'Mi Ganado'); salirModoSeleccion() },
       },
       {
-        text: 'Exportar Excel',
+        text: t('animales.exportExcel'),
         handler: () => { exportarExcel(lista, 'Mi Ganado'); salirModoSeleccion() },
       },
-      { text: 'Cancelar', role: 'cancel' },
+      { text: t('common.cancel'), role: 'cancel' },
     ],
   })
   await sheet.present()
@@ -172,20 +174,20 @@ async function abrirOpciones(animal: Ganado) {
     header: animal.nombre ?? animal.arete,
     buttons: [
       {
-        text: 'Editar',
+        text: t('fincas.edit'),
         handler: () => editarAnimal(animal),
       },
       {
-        text: 'Eliminar',
+        text: t('fincas.delete'),
         role: 'destructive',
         handler: async () => {
           const alert = await alertController.create({
-            header: 'Eliminar animal',
-            message: '¿Desea eliminar este animal?',
+            header: t('animales.deleteAnimalTitle'),
+            message: t('animales.deleteAnimalMessage'),
             buttons: [
-              { text: 'Cancelar', role: 'cancel' },
+              { text: t('common.cancel'), role: 'cancel' },
               {
-                text: 'Eliminar',
+                text: t('fincas.delete'),
                 role: 'destructive',
                 handler: async () => {
                   await deleteGanado(animal.id)
@@ -197,7 +199,7 @@ async function abrirOpciones(animal: Ganado) {
           await alert.present()
         },
       },
-      { text: 'Cancelar', role: 'cancel' },
+      { text: t('common.cancel'), role: 'cancel' },
     ],
   })
   await sheet.present()
@@ -213,7 +215,7 @@ onMounted(cargar)
         <ion-buttons slot="start">
           <ion-back-button default-href="/tabs/home" />
         </ion-buttons>
-        <ion-title>Mi Ganado</ion-title>
+        <ion-title>{{ t('home.ganadero.myCattle') }}</ion-title>
         <ion-buttons slot="end">
           <ion-button v-if="modoSeleccion" fill="clear" @click="salirModoSeleccion">
             <ion-icon :icon="closeOutline" />
@@ -226,16 +228,16 @@ onMounted(cargar)
     </ion-header>
 
     <ion-content>
-      <ion-searchbar v-model="search" placeholder="Buscar animal" class="searchbar" />
+      <ion-searchbar v-model="search" :placeholder="t('animales.searchPlaceholder')" class="searchbar" />
 
       <!-- Banner modo selección -->
       <div v-if="modoSeleccion" class="seleccion-banner">
         <ion-icon :icon="checkboxOutline" />
-        <span>{{ seleccionados.size > 0 ? `${seleccionados.size} seleccionado${seleccionados.size !== 1 ? 's' : ''}` : 'Tocá los animales a exportar' }}</span>
+        <span>{{ seleccionados.size > 0 ? t(seleccionados.size !== 1 ? 'animales.selectedPlural' : 'animales.selectedSingular', { count: seleccionados.size }) : t('animales.tapToExport') }}</span>
       </div>
 
       <div v-if="loading" class="empty-state">
-        <p>Cargando animales...</p>
+        <p>{{ t('animales.loading') }}</p>
       </div>
 
       <ion-list v-else-if="filtrados.length > 0" class="lista">
@@ -260,7 +262,7 @@ onMounted(cargar)
           </ion-label>
           <template v-if="!modoSeleccion">
             <ion-button slot="end" fill="outline" size="small" color="primary" @click.stop="seleccionarAnimal(animal)">
-              Seleccionar
+              {{ t('fincas.select') }}
             </ion-button>
             <ion-button v-if="puedeEditarCompleto" slot="end" fill="clear" @click.stop="abrirOpciones(animal)">
               <ion-icon :icon="ellipsisVertical" />
@@ -271,7 +273,7 @@ onMounted(cargar)
 
       <div v-else class="empty-state">
         <ion-icon :icon="logoBuffer" class="empty-icon" />
-        <p>No hay animales registrados.</p>
+        <p>{{ t('animales.emptyTitle') }}</p>
       </div>
     </ion-content>
 
@@ -279,7 +281,7 @@ onMounted(cargar)
     <div v-if="modoSeleccion" class="export-bar">
       <ion-button expand="block" fill="outline" color="primary" @click="abrirExportar">
         <ion-icon :icon="documentTextOutline" slot="start" />
-        {{ seleccionados.size > 0 ? `Exportar ${seleccionados.size} seleccionado${seleccionados.size !== 1 ? 's' : ''}` : 'Exportar todos' }}
+        {{ seleccionados.size > 0 ? t(seleccionados.size !== 1 ? 'animales.exportSelectedPlural' : 'animales.exportSelectedSingular', { count: seleccionados.size }) : t('animales.exportAll') }}
       </ion-button>
     </div>
 
@@ -287,7 +289,7 @@ onMounted(cargar)
     <ion-modal :is-open="showModal" @did-dismiss="showModal = false">
       <ion-header>
         <ion-toolbar>
-          <ion-title>Editar Animal</ion-title>
+          <ion-title>{{ t('animales.editAnimal') }}</ion-title>
           <ion-buttons slot="end">
             <ion-button fill="clear" @click="showModal = false">✕</ion-button>
           </ion-buttons>
@@ -296,46 +298,46 @@ onMounted(cargar)
 
       <ion-content class="ion-padding modal-content">
         <div class="form-group">
-          <label class="form-label">Número de Identificación *</label>
+          <label class="form-label">{{ t('animales.idLabel') }}</label>
           <ion-input v-model="form.arete" class="form-input" fill="outline" />
         </div>
 
         <div class="form-group">
-          <label class="form-label">Nombre *</label>
+          <label class="form-label">{{ t('animales.nameLabel') }}</label>
           <ion-input v-model="form.nombre" class="form-input" fill="outline" />
         </div>
 
         <div class="form-group">
-          <label class="form-label">Finca *</label>
+          <label class="form-label">{{ t('animales.farmLabel') }}</label>
           <ion-select v-model="form.finca_id" class="form-select" fill="outline">
             <ion-select-option v-for="f in fincas" :key="f.id" :value="f.id">{{ f.nombre }}</ion-select-option>
           </ion-select>
         </div>
 
         <div class="form-group">
-          <label class="form-label">Raza *</label>
+          <label class="form-label">{{ t('home.ganadero.breedLabel') }}</label>
           <ion-select v-model="form.raza" class="form-select" fill="outline">
             <ion-select-option v-for="r in RAZAS" :key="r" :value="r">{{ r }}</ion-select-option>
           </ion-select>
         </div>
 
         <div class="form-group">
-          <label class="form-label">Sexo *</label>
-          <ion-select v-model="form.sexo" placeholder="Selecciona el sexo" class="form-select" fill="outline">
+          <label class="form-label">{{ t('animales.sexLabel') }}</label>
+          <ion-select v-model="form.sexo" :placeholder="t('animales.selectSex')" class="form-select" fill="outline">
             <ion-select-option v-for="s in SEXOS" :key="s" :value="s">{{ s }}</ion-select-option>
           </ion-select>
         </div>
 
         <div class="form-group">
-          <label class="form-label">Estado *</label>
+          <label class="form-label">{{ t('animales.stateLabel') }}</label>
           <ion-select v-model="form.estado_comercial_id" class="form-select" fill="outline">
             <ion-select-option v-for="e in estadosComerciales" :key="e.id" :value="e.id">{{ e.nombre }}</ion-select-option>
           </ion-select>
         </div>
 
         <div class="modal-actions">
-          <ion-button expand="block" fill="outline" @click="showModal = false">Cancelar</ion-button>
-          <ion-button expand="block" color="primary" @click="guardar">Actualizar Animal</ion-button>
+          <ion-button expand="block" fill="outline" @click="showModal = false">{{ t('common.cancel') }}</ion-button>
+          <ion-button expand="block" color="primary" @click="guardar">{{ t('animales.updateAnimal') }}</ion-button>
         </div>
       </ion-content>
     </ion-modal>
@@ -349,18 +351,18 @@ onMounted(cargar)
 .animal-item {
   margin-bottom: 8px;
   border-radius: 12px;
-  --background: #fff;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+  --background: var(--bov-surface);
+  box-shadow: 0 2px 8px var(--bov-shadow);
   --padding-top: 10px;
   --padding-bottom: 10px;
 }
 
 .item-seleccionado {
-  --background: #e8f5e9;
+  --background: var(--bov-success-soft-bg);
 }
 
 .animal-icon { font-size: 28px; color: var(--ion-color-medium); }
-.animal-arete { font-weight: 700; font-size: 1rem; color: var(--ion-color-dark); }
+.animal-arete { font-weight: 700; font-size: 1rem; color: var(--bov-text-strong); }
 .animal-nombre { font-size: 0.85rem; color: var(--ion-color-medium); margin-top: 2px; }
 .animal-finca { font-size: 0.78rem; color: var(--ion-color-primary); margin-top: 2px; }
 .empty-state { text-align: center; padding: 48px 16px; color: var(--ion-color-medium); }
@@ -379,13 +381,13 @@ onMounted(cargar)
 
 .export-bar {
   padding: 12px 16px;
-  background: #fff;
+  background: var(--bov-surface);
   border-top: 1px solid var(--ion-color-light-shade);
 }
 
 .modal-content { --padding-top: 16px; }
 .form-group { margin-bottom: 16px; }
-.form-label { display: block; font-size: 0.9rem; font-weight: 600; color: var(--ion-color-dark); margin-bottom: 6px; }
+.form-label { display: block; font-size: 0.9rem; font-weight: 600; color: var(--bov-text-strong); margin-bottom: 6px; }
 .form-input, .form-select { --border-radius: 10px; width: 100%; }
 .modal-actions { display: flex; flex-direction: column; gap: 8px; margin-top: 24px; }
 ion-button { --border-radius: 10px; }

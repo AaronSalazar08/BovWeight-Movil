@@ -2,7 +2,7 @@
   <ion-page>
     <ion-header class="ion-no-border">
       <ion-toolbar color="primary">
-        <ion-title>Nueva contraseña</ion-title>
+        <ion-title>{{ t('auth.resetPassword.title') }}</ion-title>
       </ion-toolbar>
     </ion-header>
 
@@ -13,13 +13,13 @@
             <div class="icon-wrapper">
               <ion-icon :icon="keyOutline" class="header-icon" />
             </div>
-            <h2>Crear nueva contraseña</h2>
-            <p>La contraseña debe tener al menos 8 caracteres, una mayúscula, un número y un carácter especial.</p>
+            <h2>{{ t('auth.resetPassword.title') }}</h2>
+            <p>{{ t('auth.resetPassword.description') }}</p>
           </div>
 
           <div v-if="!token" class="alert-error">
             <ion-icon :icon="alertCircleOutline" />
-            <span>Enlace de recuperación inválido o expirado. Solicita uno nuevo.</span>
+            <span>{{ t('auth.resetPassword.invalidLink') }}</span>
           </div>
 
           <form v-else @submit.prevent="handleReset" novalidate>
@@ -27,7 +27,7 @@
               <ion-input
                 v-model="form.contrasena"
                 :type="showPassword ? 'text' : 'password'"
-                label="Nueva contraseña"
+                :label="t('auth.resetPassword.newPasswordLabel')"
                 label-placement="floating"
                 fill="outline"
                 placeholder="••••••••"
@@ -45,7 +45,7 @@
               <ion-input
                 v-model="form.confirmacion"
                 :type="showConfirm ? 'text' : 'password'"
-                label="Confirmar contraseña"
+                :label="t('auth.resetPassword.confirmPasswordLabel')"
                 label-placement="floating"
                 fill="outline"
                 placeholder="••••••••"
@@ -82,12 +82,12 @@
               class="submit-btn"
             >
               <ion-spinner v-if="isLoading" name="crescent" slot="start" />
-              {{ isLoading ? 'Guardando...' : 'Guardar contraseña' }}
+              {{ isLoading ? t('auth.resetPassword.submitting') : t('auth.resetPassword.submit') }}
             </ion-button>
           </form>
 
           <ion-button fill="clear" expand="block" router-link="/forgot-password" replace class="back-btn">
-            Solicitar nuevo enlace
+            {{ t('auth.resetPassword.requestNewLink') }}
           </ion-button>
         </div>
 
@@ -96,10 +96,10 @@
           <div class="success-icon-wrapper">
             <ion-icon :icon="checkmarkCircleOutline" class="success-icon" />
           </div>
-          <h2>¡Contraseña actualizada!</h2>
-          <p>Tu contraseña fue cambiada exitosamente. Ya puedes iniciar sesión.</p>
+          <h2>{{ t('auth.resetPassword.successTitle') }}</h2>
+          <p>{{ t('auth.resetPassword.successMessage') }}</p>
           <ion-button expand="block" router-link="/login" replace class="submit-btn">
-            Ir al inicio de sesión
+            {{ t('auth.resetPassword.goToLogin') }}
           </ion-button>
         </div>
       </div>
@@ -110,9 +110,11 @@
 <script setup lang="ts">
 import { ref, reactive, computed } from 'vue'
 import { useRoute } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 import {
   IonPage, IonHeader, IonToolbar, IonTitle, IonContent,
   IonInput, IonButton, IonIcon, IonSpinner,
+  onIonViewWillEnter,
 } from '@ionic/vue'
 import {
   keyOutline, eyeOutline, eyeOffOutline, alertCircleOutline, checkmarkCircleOutline,
@@ -120,6 +122,7 @@ import {
 import { authApi } from '@/api/auth'
 
 const route = useRoute()
+const { t } = useI18n()
 
 const token = computed(() => (route.query.token as string) ?? '')
 const correo = computed(() => (route.query.email as string) ?? '')
@@ -146,18 +149,18 @@ const passwordStrength = computed(() => {
 })
 
 const strengthLabel = computed(() => {
-  const labels = ['', 'Muy débil', 'Débil', 'Regular', 'Segura']
+  const labels = ['', t('auth.resetPassword.strength1'), t('auth.resetPassword.strength2'), t('auth.resetPassword.strength3'), t('auth.resetPassword.strength4')]
   return labels[passwordStrength.value]
 })
 
 function validateContrasena(): boolean {
   errors.contrasena = ''
   if (!form.contrasena) {
-    errors.contrasena = 'La contraseña es requerida.'
+    errors.contrasena = t('auth.resetPassword.passwordRequired')
     return false
   }
   if (!PASSWORD_REGEX.test(form.contrasena)) {
-    errors.contrasena = 'Mínimo 8 caracteres, una mayúscula, un número y un carácter especial.'
+    errors.contrasena = t('auth.resetPassword.passwordInvalid')
     return false
   }
   return true
@@ -166,15 +169,31 @@ function validateContrasena(): boolean {
 function validateConfirmacion(): boolean {
   errors.confirmacion = ''
   if (!form.confirmacion) {
-    errors.confirmacion = 'Confirma tu contraseña.'
+    errors.confirmacion = t('auth.resetPassword.confirmRequired')
     return false
   }
   if (form.contrasena !== form.confirmacion) {
-    errors.confirmacion = 'Las contraseñas no coinciden.'
+    errors.confirmacion = t('auth.resetPassword.confirmMismatch')
     return false
   }
   return true
 }
+
+// Ionic mantiene en caché las páginas para las transiciones (no las destruye
+// al navegar), así que esta vista puede reutilizar su instancia anterior si
+// se visita más de una vez en la misma sesión (ahora posible con el flujo de
+// OTP). Sin este reseteo, un "resetDone" de una visita previa haría saltar
+// directo a la pantalla de éxito sin pasar por el formulario.
+onIonViewWillEnter(() => {
+  resetDone.value = false
+  form.contrasena = ''
+  form.confirmacion = ''
+  errors.contrasena = ''
+  errors.confirmacion = ''
+  submitError.value = ''
+  showPassword.value = false
+  showConfirm.value = false
+})
 
 async function handleReset() {
   const valid = validateContrasena() && validateConfirmacion()
@@ -195,9 +214,9 @@ async function handleReset() {
   } catch (err: any) {
     const status = err?.response?.status
     if (status === 422) {
-      submitError.value = 'El enlace expiró o ya fue usado. Solicita uno nuevo.'
+      submitError.value = t('auth.resetPassword.errorExpired')
     } else {
-      submitError.value = 'No se pudo actualizar la contraseña. Intenta de nuevo.'
+      submitError.value = t('auth.resetPassword.errorGeneric')
     }
   } finally {
     isLoading.value = false
@@ -207,16 +226,16 @@ async function handleReset() {
 
 <style scoped>
 .reset-content {
-  --background: #f5f7fa;
+  --background: var(--ion-background-color);
 }
 
 .reset-wrapper {
   padding: 32px 20px;
   max-width: 480px;
   margin: 0 auto;
-  color: #1a1a1a;
-  --ion-text-color: #1a1a1a;
-  --color: #1a1a1a;
+  color: var(--bov-text-strong);
+  --ion-text-color: var(--bov-text-strong);
+  --color: var(--bov-text-strong);
 }
 
 .page-header {
@@ -228,7 +247,7 @@ async function handleReset() {
   width: 72px;
   height: 72px;
   border-radius: 50%;
-  background: #e8f5e9;
+  background: var(--bov-success-soft-bg);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -243,13 +262,13 @@ async function handleReset() {
 .page-header h2 {
   font-size: 22px;
   font-weight: 700;
-  color: #1a1a1a;
+  color: var(--bov-text-strong);
   margin: 0 0 10px;
 }
 
 .page-header p {
   font-size: 13px;
-  color: #666;
+  color: var(--bov-text-muted);
   line-height: 1.6;
   margin: 0;
 }
@@ -274,7 +293,7 @@ async function handleReset() {
   flex: 1;
   height: 4px;
   border-radius: 2px;
-  background: #e0e0e0;
+  background: var(--bov-track-bg);
   transition: background 0.3s;
 }
 
@@ -285,7 +304,7 @@ async function handleReset() {
 
 .strength-label {
   font-size: 12px;
-  color: #888;
+  color: var(--bov-text-muted);
   margin: 2px 0 16px;
   text-align: right;
 }
@@ -294,8 +313,8 @@ async function handleReset() {
   display: flex;
   align-items: center;
   gap: 8px;
-  background: #fef2f2;
-  border: 1px solid #fecaca;
+  background: var(--bov-danger-soft-bg);
+  border: 1px solid var(--bov-danger-soft-border);
   border-radius: 8px;
   padding: 10px 12px;
   margin-bottom: 16px;
@@ -324,7 +343,7 @@ async function handleReset() {
   width: 80px;
   height: 80px;
   border-radius: 50%;
-  background: #e8f5e9;
+  background: var(--bov-success-soft-bg);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -339,13 +358,13 @@ async function handleReset() {
 .success-state h2 {
   font-size: 22px;
   font-weight: 700;
-  color: #1a1a1a;
+  color: var(--bov-text-strong);
   margin: 0 0 12px;
 }
 
 .success-state p {
   font-size: 14px;
-  color: #666;
+  color: var(--bov-text-muted);
   line-height: 1.6;
   margin: 0 0 28px;
 }

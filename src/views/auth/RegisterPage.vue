@@ -252,28 +252,28 @@ function goToLogin() {
 
 <style scoped>
 .register-content {
-  --background: #f5f7fa;
+  --background: var(--ion-background-color);
 }
 
 .register-wrapper {
   padding: 20px 16px 32px;
   max-width: 500px;
   margin: 0 auto;
-  color: #1a1a1a;
-  --ion-text-color: #1a1a1a;
-  --color: #1a1a1a;
+  color: var(--bov-text-strong);
+  --ion-text-color: var(--bov-text-strong);
+  --color: var(--bov-text-strong);
 }
 
 .register-info {
   display: flex;
   align-items: flex-start;
   gap: 10px;
-  background: #e8f5e9;
-  border: 1px solid #a5d6a7;
+  background: var(--bov-success-soft-bg);
+  border: 1px solid var(--bov-success-soft-border);
   border-radius: 10px;
   padding: 12px 14px;
   margin-bottom: 24px;
-  color: #2e7d32;
+  color: var(--bov-success-soft-text);
   font-size: 13px;
   line-height: 1.5;
 }
@@ -298,8 +298,8 @@ function goToLogin() {
   display: flex;
   align-items: center;
   gap: 8px;
-  background: #fef2f2;
-  border: 1px solid #fecaca;
+  background: var(--bov-danger-soft-bg);
+  border: 1px solid var(--bov-danger-soft-border);
   border-radius: 8px;
   padding: 10px 12px;
   margin-bottom: 16px;
@@ -322,7 +322,7 @@ ion-input.input-error {
 
 /* Modal de éxito */
 .success-modal {
-  --background: #ffffff;
+  --background: var(--bov-surface);
 }
 
 .success-content {
@@ -331,16 +331,16 @@ ion-input.input-error {
   align-items: center;
   text-align: center;
   padding: 32px 24px;
-  color: #1a1a1a;
-  --ion-text-color: #1a1a1a;
-  --color: #1a1a1a;
+  color: var(--bov-text-strong);
+  --ion-text-color: var(--bov-text-strong);
+  --color: var(--bov-text-strong);
 }
 
 .success-icon-wrapper {
   width: 72px;
   height: 72px;
   border-radius: 50%;
-  background: #e8f5e9;
+  background: var(--bov-success-soft-bg);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -355,13 +355,13 @@ ion-input.input-error {
 .success-content h3 {
   font-size: 20px;
   font-weight: 700;
-  color: #1a1a1a;
+  color: var(--bov-text-strong);
   margin: 0 0 12px;
 }
 
 .success-content p {
   font-size: 14px;
-  color: #666;
+  color: var(--bov-text-muted);
   margin: 0 0 24px;
   line-height: 1.6;
 }

@@ -48,11 +48,13 @@ import { useAuthStore } from '@/stores/auth'
 import { useEstimacionPendienteStore } from '@/stores/estimacionPendiente'
 import { useToast } from '@/composables/useToast'
 import { useRouter } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 
 const router = useRouter()
 const authStore = useAuthStore()
 const estimacionPendienteStore = useEstimacionPendienteStore()
 const { info } = useToast()
+const { t } = useI18n()
 const canManageFincas = computed(() => !authStore.isVeterinario)
 
 const fincas = ref<Finca[]>([])
@@ -99,7 +101,7 @@ const loadFincas = async () => {
 
     console.error(error)
 
-    loadError.value = 'No fue posible cargar las fincas. Revisa el servidor.'
+    loadError.value = t('fincas.loadError')
 
     fincas.value = []
 
@@ -204,21 +206,21 @@ async function eliminarFinca(id: number) {
 
   const alert = await alertController.create({
 
-    header: 'Eliminar finca',
+    header: t('fincas.deleteFarmTitle'),
 
-    message: '¿Desea eliminar esta finca?',
+    message: t('fincas.deleteFarmMessage'),
 
     cssClass: 'bov-alert',
 
     buttons: [
 
       {
-        text: 'Cancelar',
+        text: t('common.cancel'),
         role: 'cancel',
       },
 
       {
-        text: 'Eliminar',
+        text: t('fincas.delete'),
         role: 'destructive',
 
         handler: async () => {
@@ -257,7 +259,7 @@ function abrirModalVet(finca: Finca) {
 
 async function enviarSolicitudVet() {
   if (!vetForm.correo_veterinario) {
-    vetError.value = 'El correo del veterinario es requerido.'
+    vetError.value = t('fincas.vetEmailRequired')
     return
   }
   vetLoading.value = true
@@ -266,13 +268,13 @@ async function enviarSolicitudVet() {
     await solicitudesVetApi.create(vetForm)
     showVetModal.value = false
     const alert = await alertController.create({
-      header: 'Solicitud enviada',
-      message: 'Tu solicitud de veterinario fue enviada al administrador.',
+      header: t('fincas.vetRequestSentTitle'),
+      message: t('fincas.vetRequestSentMessage'),
       buttons: ['OK'],
     })
     await alert.present()
   } catch (error: any) {
-    vetError.value = error?.response?.data?.message ?? 'Error al enviar la solicitud.'
+    vetError.value = error?.response?.data?.message ?? t('fincas.vetRequestErrorDefault')
   } finally {
     vetLoading.value = false
   }
@@ -284,11 +286,11 @@ async function openOptions(finca: Finca) {
   if (canManageFincas.value) {
     buttons.push(
       {
-        text: 'Editar',
+        text: t('fincas.edit'),
         handler: () => { editarFinca(finca) },
       },
       {
-        text: 'Eliminar',
+        text: t('fincas.delete'),
         role: 'destructive',
         handler: () => { eliminarFinca(finca.id) },
       },
@@ -297,12 +299,12 @@ async function openOptions(finca: Finca) {
 
   if (authStore.isGanadero) {
     buttons.push({
-      text: 'Solicitar Veterinario',
+      text: t('fincas.requestVet'),
       handler: () => { abrirModalVet(finca) },
     })
   }
 
-  buttons.push({ text: 'Cancelar', role: 'cancel' })
+  buttons.push({ text: t('common.cancel'), role: 'cancel' })
 
   const actionSheet = await actionSheetController.create({
     header: finca.nombre,
@@ -318,7 +320,7 @@ onMounted(() => {
   loadFincas()
 
   if (estimacionPendienteStore.hayPendiente) {
-    info('Selecciona la finca donde se registrará el animal estimado.')
+    info(t('fincas.pendingEstimationToast'))
   }
 
 })
@@ -338,7 +340,7 @@ onMounted(() => {
         </ion-buttons>
 
         <ion-title>
-          Fincas
+          {{ t('fincas.title') }}
         </ion-title>
 
       </ion-toolbar>
@@ -351,11 +353,11 @@ onMounted(() => {
 
       <ion-searchbar
         v-model="search"
-        placeholder="Buscar finca"
+        :placeholder="t('fincas.searchPlaceholder')"
         class="searchbar"
       />
 
-      
+
 
       <!-- LISTA -->
 
@@ -363,7 +365,7 @@ onMounted(() => {
         <ion-icon :icon="homeOutline" class="empty-icon" />
         <p>{{ loadError }}</p>
         <ion-button size="small" @click="retryLoadFincas">
-          Reintentar
+          {{ t('fincas.retry') }}
         </ion-button>
       </div>
 
@@ -383,7 +385,7 @@ onMounted(() => {
 
           <ion-label>
             <div class="item-title">{{ finca.nombre }}</div>
-            <div class="item-meta">{{ finca.ubicacion || 'Ubicación no definida' }}</div>
+            <div class="item-meta">{{ finca.ubicacion || t('fincas.locationUndefined') }}</div>
           </ion-label>
 
           <ion-button
@@ -393,7 +395,7 @@ onMounted(() => {
             @click="seleccionarFinca(finca)"
             class="select-btn"
           >
-            Seleccionar
+            {{ t('fincas.select') }}
           </ion-button>
 
           <ion-button
@@ -401,7 +403,7 @@ onMounted(() => {
             slot="end"
             fill="clear"
             @click="openOptions(finca)"
-            aria-label="Más opciones"
+            :aria-label="t('fincas.moreOptions')"
           >
             <ion-icon :icon="ellipsisVertical" />
           </ion-button>
@@ -412,13 +414,13 @@ onMounted(() => {
 
       <div v-else-if="!loading" class="empty-state">
         <ion-icon :icon="homeOutline" class="empty-icon" />
-        <p>No se encontraron fincas.</p>
-        <p class="empty-note">Pulsa el botón + para agregar una nueva finca.</p>
+        <p>{{ t('fincas.emptyTitle') }}</p>
+        <p class="empty-note">{{ t('fincas.emptyNote') }}</p>
       </div>
 
       <div v-else class="empty-state">
         <ion-icon :icon="homeOutline" class="empty-icon" />
-        <p>Cargando fincas...</p>
+        <p>{{ t('fincas.loading') }}</p>
       </div>
 
       <!-- FAB -->
@@ -444,22 +446,22 @@ onMounted(() => {
 
         <ion-header>
           <ion-toolbar color="primary">
-            <ion-title>Solicitar Veterinario</ion-title>
+            <ion-title>{{ t('fincas.requestVet') }}</ion-title>
           </ion-toolbar>
         </ion-header>
 
         <ion-content class="ion-padding modal-content">
 
           <p style="color: var(--ion-color-medium); font-size: 0.9rem; padding-bottom: 8px">
-            Finca: <strong>{{ fincaParaVet?.nombre }}</strong>
+            {{ t('fincas.vetFarmLabel') }} <strong>{{ fincaParaVet?.nombre }}</strong>
           </p>
 
           <ion-item>
-            <ion-label position="stacked">Correo del veterinario *</ion-label>
+            <ion-label position="stacked">{{ t('fincas.vetEmailLabel') }}</ion-label>
             <ion-input
               v-model="vetForm.correo_veterinario"
               type="email"
-              placeholder="correo@ejemplo.com"
+              :placeholder="t('fincas.vetEmailPlaceholder')"
             />
           </ion-item>
 
@@ -468,12 +470,12 @@ onMounted(() => {
           </p>
 
           <ion-button expand="block" class="ion-margin-top" :disabled="vetLoading" @click="enviarSolicitudVet">
-            <span v-if="vetLoading">Enviando...</span>
-            <span v-else>Enviar Solicitud</span>
+            <span v-if="vetLoading">{{ t('fincas.sending') }}</span>
+            <span v-else>{{ t('fincas.sendRequest') }}</span>
           </ion-button>
 
           <ion-button expand="block" fill="outline" @click="showVetModal = false">
-            Cancelar
+            {{ t('common.cancel') }}
           </ion-button>
 
         </ion-content>
@@ -490,7 +492,7 @@ onMounted(() => {
 
             <ion-title>
 
-              {{ editMode ? 'Editar Finca' : 'Nueva Finca' }}
+              {{ editMode ? t('fincas.editFarm') : t('fincas.newFarm') }}
 
             </ion-title>
 
@@ -503,7 +505,7 @@ onMounted(() => {
           <ion-item>
 
             <ion-label position="stacked">
-              Nombre
+              {{ t('fincas.nameLabel') }}
             </ion-label>
 
             <ion-input
@@ -515,7 +517,7 @@ onMounted(() => {
           <ion-item>
 
             <ion-label position="stacked">
-              Ubicación
+              {{ t('fincas.locationLabel') }}
             </ion-label>
 
             <ion-input
@@ -527,7 +529,7 @@ onMounted(() => {
           <ion-item>
 
             <ion-label position="stacked">
-              Área
+              {{ t('fincas.areaLabel') }}
             </ion-label>
 
             <ion-input
@@ -540,7 +542,7 @@ onMounted(() => {
           <ion-item>
 
             <ion-label position="stacked">
-              Número finca
+              {{ t('fincas.farmNumberLabel') }}
             </ion-label>
 
             <ion-input
@@ -554,7 +556,7 @@ onMounted(() => {
             @click="saveFinca"
           >
 
-            {{ editMode ? 'Actualizar' : 'Guardar' }}
+            {{ editMode ? t('fincas.update') : t('fincas.save') }}
 
           </ion-button>
 
@@ -564,7 +566,7 @@ onMounted(() => {
             @click="closeModal"
           >
 
-            Cancelar
+            {{ t('common.cancel') }}
 
           </ion-button>
 
@@ -580,19 +582,19 @@ onMounted(() => {
 
 <style scoped>
 .fincas-content {
-  --background: #f0f4f8;
+  --background: var(--ion-background-color);
 }
 
 .modal-content {
-  --background: #ffffff;
-  --color: #1a1a1a;
-  --ion-item-background: #ffffff;
+  --background: var(--bov-surface);
+  --color: var(--bov-text-strong);
+  --ion-item-background: var(--bov-surface);
 }
 </style><style scoped>
-/* Fuerza fondo claro en el contenedor de la lista para que no aparezcan
-   barras negras entre los items cuando el sistema está en modo oscuro. */
+/* Fondo del contenedor de la lista igual al fondo de página, para que no
+   aparezcan barras de otro color entre los items "inset". */
 ion-list {
-  background: #f0f4f8;
+  background: var(--ion-background-color);
 }
 
 .list-header {
@@ -607,9 +609,9 @@ ion-list {
 }
 
 .searchbar {
-  --background: #ffffff;
-  --color: #1a1a1a;
-  --icon-color: #555555;
+  --background: var(--bov-surface);
+  --color: var(--bov-text-strong);
+  --icon-color: var(--bov-text-muted);
   --placeholder-color: #9e9e9e;
   --border-radius: 10px;
   --padding-start: 6px;
@@ -620,8 +622,8 @@ ion-list {
 .finca-item {
   margin-bottom: 12px;
   border-radius: 12px;
-  --background: #fbfbfb;
-  box-shadow: 0 6px 18px rgba(17,17,17,0.04);
+  --background: var(--bov-surface);
+  box-shadow: 0 6px 18px var(--bov-shadow);
   --padding-top: 10px;
   --padding-bottom: 10px;
   align-items: center;

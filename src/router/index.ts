@@ -28,10 +28,16 @@ const routes: Array<RouteRecordRaw> = [
     meta: { requiresGuest: true },
   },
   {
+    path: '/verify-otp',
+    name: 'VerifyOtp',
+    component: () => import('@/views/auth/VerifyOtpPage.vue'),
+  },
+  {
+    // Sin requiresGuest: la usan tanto "Olvidé mi contraseña" (invitado) como
+    // "Cambiar contraseña" desde Perfil > Configuración (autenticado).
     path: '/reset-password',
     name: 'ResetPassword',
     component: () => import('@/views/auth/ResetPasswordPage.vue'),
-    meta: { requiresGuest: true },
   },
 
   // ── Rutas protegidas (dentro de tabs) ─────────────────────────────────────
@@ -66,6 +72,12 @@ const routes: Array<RouteRecordRaw> = [
         path: 'perfil',
         name: 'Perfil',
         component: () => import('@/views/perfil/PerfilPage.vue'),
+      },
+
+      {
+        path: 'perfil/configuracion',
+        name: 'Configuracion',
+        component: () => import('@/views/perfil/ConfiguracionPage.vue'),
       },
 
       // Fincas del ganadero

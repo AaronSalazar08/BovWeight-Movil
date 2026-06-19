@@ -2,7 +2,7 @@
   <ion-page>
     <ion-header>
       <ion-toolbar color="primary">
-        <ion-title>BovWeight CR</ion-title>
+        <ion-title>{{ t('common.appName') }}</ion-title>
         <ion-buttons slot="end">
           <ion-button @click="handleLogout">
             <ion-icon slot="icon-only" :icon="logOutOutline" />
@@ -23,9 +23,9 @@
             <ion-icon :icon="medkitOutline" class="avatar-icon" />
           </div>
           <div class="welcome-text">
-            <p class="greeting">Bienvenido,</p>
+            <p class="greeting">{{ t('home.common.greeting') }}</p>
             <h2 class="user-name">{{ authStore.userDisplayName }}</h2>
-            <ion-badge color="tertiary">Veterinario</ion-badge>
+            <ion-badge color="tertiary">{{ t('home.veterinario.roleBadge') }}</ion-badge>
           </div>
         </div>
       </div>
@@ -37,7 +37,7 @@
             <ion-icon :icon="businessOutline" class="stat-icon" />
           </div>
           <p class="stat-value">{{ totalFincas }}</p>
-          <p class="stat-label">Fincas Asignadas</p>
+          <p class="stat-label">{{ t('home.veterinario.statFarmsAssigned') }}</p>
         </div>
 
         <div class="stat-card">
@@ -45,7 +45,7 @@
             <ion-icon :icon="pawOutline" class="stat-icon" />
           </div>
           <p class="stat-value">{{ totalAnimales }}</p>
-          <p class="stat-label">Animales</p>
+          <p class="stat-label">{{ t('home.common.statAnimals') }}</p>
         </div>
       </div>
 
@@ -54,14 +54,14 @@
           <div class="stat-icon-wrap">
             <ion-icon :icon="scaleOutline" class="stat-icon" />
           </div>
-          <p class="weight-label">Peso Promedio</p>
+          <p class="weight-label">{{ t('home.common.avgWeight') }}</p>
         </div>
         <p class="weight-value">{{ pesoPromedio }}<span class="weight-unit"> kg</span></p>
       </div>
 
       <!-- Acceso rápido -->
       <div class="section-title">
-        <h3>Acceso Rápido</h3>
+        <h3>{{ t('home.common.quickAccess') }}</h3>
       </div>
 
       <div class="quick-access">
@@ -71,8 +71,8 @@
               <ion-icon :icon="businessOutline" class="quick-icon" />
             </div>
             <div class="quick-text">
-              <p class="quick-title">Fincas Asignadas</p>
-              <p class="quick-subtitle">Ver fincas</p>
+              <p class="quick-title">{{ t('home.veterinario.farmsAssigned') }}</p>
+              <p class="quick-subtitle">{{ t('home.veterinario.viewFarms') }}</p>
             </div>
           </div>
           <ion-icon :icon="chevronForwardOutline" class="quick-chevron" />
@@ -84,8 +84,8 @@
               <ion-icon :icon="pawOutline" class="quick-icon" />
             </div>
             <div class="quick-text">
-              <p class="quick-title">Ganado</p>
-              <p class="quick-subtitle">Ver ganado</p>
+              <p class="quick-title">{{ t('home.veterinario.cattle') }}</p>
+              <p class="quick-subtitle">{{ t('home.veterinario.viewCattle') }}</p>
             </div>
           </div>
           <ion-icon :icon="chevronForwardOutline" class="quick-chevron" />
@@ -97,8 +97,8 @@
               <ion-icon :icon="barChartOutline" class="quick-icon" />
             </div>
             <div class="quick-text">
-              <p class="quick-title">Historial General</p>
-              <p class="quick-subtitle">Ver historial</p>
+              <p class="quick-title">{{ t('home.veterinario.generalHistory') }}</p>
+              <p class="quick-subtitle">{{ t('home.veterinario.viewHistory') }}</p>
             </div>
           </div>
           <ion-icon :icon="chevronForwardOutline" class="quick-chevron" />
@@ -107,12 +107,12 @@
 
       <!-- Actividad reciente -->
       <div class="section-title">
-        <h3>Actividad Reciente</h3>
+        <h3>{{ t('home.common.recentActivity') }}</h3>
       </div>
 
       <div class="activity-card">
         <div v-if="!recientes.length" class="activity-empty">
-          Aún no hay pesajes registrados.
+          {{ t('home.common.noWeighings') }}
         </div>
         <div v-else class="activity-row" v-for="reg in recientes" :key="reg.id">
           <img v-if="reg.ganado.imagen" :src="reg.ganado.imagen" class="activity-thumb" :alt="reg.ganado.nombre ?? reg.ganado.arete" />
@@ -120,7 +120,7 @@
             <ion-icon :icon="scaleOutline" class="activity-icon" />
           </div>
           <div class="activity-info">
-            <p class="activity-name">{{ reg.ganado.nombre ?? `Arete ${reg.ganado.arete}` }}</p>
+            <p class="activity-name">{{ reg.ganado.nombre ?? t('home.common.tagLabel', { tag: reg.ganado.arete }) }}</p>
             <p class="activity-date">{{ formatFecha(reg.fecha) }}</p>
           </div>
           <p class="activity-weight">{{ pesoEfectivo(reg) }} kg</p>
@@ -131,8 +131,9 @@
       <div class="legal-notice">
         <ion-icon :icon="informationCircleOutline" />
         <p>
-          Los resultados de estimación de peso son aproximaciones y
-          <strong>no sustituyen mediciones oficiales</strong> con báscula certificada.
+          {{ t('common.legalNoticePrefix') }}
+          <strong>{{ t('common.legalNoticeBold') }}</strong>
+          {{ t('common.legalNoticeSuffix') }}
         </p>
       </div>
     </ion-content>
@@ -142,6 +143,7 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 import {
   IonPage, IonHeader, IonToolbar, IonTitle, IonContent,
   IonButtons, IonButton, IonIcon, IonBadge,
@@ -160,6 +162,7 @@ import { getPesajesRecientes, type RegistroPesoConGanado } from '@/api/reportes'
 
 const router = useRouter()
 const authStore = useAuthStore()
+const { t, locale } = useI18n()
 
 const ganado = ref<Ganado[]>([])
 const fincas = ref<Finca[]>([])
@@ -197,19 +200,19 @@ function pesoEfectivo(reg: RegistroPesoConGanado): string {
 
 function formatFecha(fecha: string): string {
   const [y, m, d] = fecha.substring(0, 10).split('-').map(Number)
-  return new Date(y, m - 1, d).toLocaleDateString('es-CR', {
+  return new Date(y, m - 1, d).toLocaleDateString(locale.value === 'es-LA' ? 'es-CR' : 'en-US', {
     day: '2-digit', month: 'short', year: 'numeric',
   })
 }
 
 async function handleLogout() {
   const alert = await alertController.create({
-    header: 'Cerrar sesión',
-    message: '¿Estás seguro de que deseas salir?',
+    header: t('common.logoutConfirmTitle'),
+    message: t('common.logoutConfirmMessage'),
     buttons: [
-      { text: 'Cancelar', role: 'cancel' },
+      { text: t('common.cancel'), role: 'cancel' },
       {
-        text: 'Cerrar sesión',
+        text: t('common.logout'),
         role: 'destructive',
         handler: async () => {
           await authStore.logout()
@@ -241,7 +244,7 @@ function goToHistorial() {
 
 <style scoped>
 .home-content {
-  --background: #f0f4f8;
+  --background: var(--ion-background-color);
 }
 
 .welcome-section {
@@ -294,7 +297,7 @@ function goToHistorial() {
 .section-title h3 {
   font-size: 16px;
   font-weight: 600;
-  color: #333;
+  color: var(--bov-text-strong);
   margin: 0;
 }
 
@@ -307,10 +310,10 @@ function goToHistorial() {
 }
 
 .stat-card {
-  background: #ffffff;
+  background: var(--bov-surface);
   border-radius: 14px;
   padding: 16px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  box-shadow: 0 2px 8px var(--bov-shadow);
 }
 
 .stat-icon-wrap {
@@ -329,24 +332,24 @@ function goToHistorial() {
 .stat-value {
   font-size: 24px;
   font-weight: 700;
-  color: #1a1a1a;
+  color: var(--bov-text-strong);
   margin: 0;
   line-height: 1.1;
 }
 
 .stat-label {
   font-size: 13px;
-  color: #888;
+  color: var(--bov-text-muted);
   margin: 4px 0 0;
 }
 
 /* Peso promedio */
 .weight-card {
   margin: 12px 16px 0;
-  background: #ffffff;
+  background: var(--bov-surface);
   border-radius: 14px;
   padding: 16px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  box-shadow: 0 2px 8px var(--bov-shadow);
 }
 
 .weight-header {
@@ -359,21 +362,21 @@ function goToHistorial() {
 .weight-label {
   font-size: 14px;
   font-weight: 600;
-  color: #444;
+  color: var(--bov-text-strong);
   margin: 0;
 }
 
 .weight-value {
   font-size: 30px;
   font-weight: 700;
-  color: #1a1a1a;
+  color: var(--bov-text-strong);
   margin: 0;
 }
 
 .weight-unit {
   font-size: 16px;
   font-weight: 400;
-  color: #999;
+  color: var(--bov-text-muted);
 }
 
 /* Acceso rápido */
@@ -385,13 +388,13 @@ function goToHistorial() {
 }
 
 .quick-card {
-  background: #ffffff;
+  background: var(--bov-surface);
   border-radius: 14px;
   padding: 14px 16px;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  box-shadow: 0 2px 8px var(--bov-shadow);
   cursor: pointer;
   border: none;
   width: 100%;
@@ -427,36 +430,36 @@ function goToHistorial() {
 .quick-title {
   font-size: 14px;
   font-weight: 600;
-  color: #333;
+  color: var(--bov-text-strong);
   margin: 0;
 }
 
 .quick-subtitle {
   font-size: 12px;
-  color: #888;
+  color: var(--bov-text-muted);
   margin: 2px 0 0;
 }
 
 .quick-chevron {
   font-size: 18px;
-  color: #ccc;
+  color: var(--bov-text-faint);
   flex-shrink: 0;
 }
 
 /* Actividad reciente */
 .activity-card {
   margin: 0 16px;
-  background: #ffffff;
+  background: var(--bov-surface);
   border-radius: 14px;
   padding: 8px 16px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  box-shadow: 0 2px 8px var(--bov-shadow);
 }
 
 .activity-empty {
   padding: 16px 0;
   text-align: center;
   font-size: 13px;
-  color: #aaa;
+  color: var(--bov-text-muted);
 }
 
 .activity-row {
@@ -464,7 +467,7 @@ function goToHistorial() {
   align-items: center;
   gap: 12px;
   padding: 12px 0;
-  border-bottom: 1px solid #f0f0f0;
+  border-bottom: 1px solid var(--bov-border);
 }
 
 .activity-row:last-child {
@@ -503,7 +506,7 @@ function goToHistorial() {
 .activity-name {
   font-size: 13px;
   font-weight: 600;
-  color: #333;
+  color: var(--bov-text-strong);
   margin: 0;
   white-space: nowrap;
   overflow: hidden;
@@ -512,14 +515,14 @@ function goToHistorial() {
 
 .activity-date {
   font-size: 11px;
-  color: #aaa;
+  color: var(--bov-text-muted);
   margin: 2px 0 0;
 }
 
 .activity-weight {
   font-size: 14px;
   font-weight: 600;
-  color: #1a1a1a;
+  color: var(--bov-text-strong);
   margin: 0;
   flex-shrink: 0;
 }
@@ -529,11 +532,11 @@ function goToHistorial() {
   align-items: flex-start;
   gap: 10px;
   margin: 20px 16px 32px;
-  background: #fff8e1;
-  border: 1px solid #ffe082;
+  background: var(--bov-warning-soft-bg);
+  border: 1px solid var(--bov-warning-soft-border);
   border-radius: 10px;
   padding: 12px 14px;
-  color: #795548;
+  color: var(--bov-warning-soft-text);
   font-size: 12px;
   line-height: 1.5;
 }
@@ -542,7 +545,7 @@ function goToHistorial() {
   font-size: 18px;
   flex-shrink: 0;
   margin-top: 1px;
-  color: #f57c00;
+  color: var(--bov-warning-soft-icon);
 }
 
 .legal-notice p {

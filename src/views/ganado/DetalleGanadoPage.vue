@@ -28,6 +28,7 @@ import {
 } from 'ionicons/icons'
 
 import { Camera, CameraResultType, CameraSource } from '@capacitor/camera'
+import { Filesystem, Directory } from '@capacitor/filesystem'
 import { onMounted, ref, reactive } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import {
@@ -44,6 +45,13 @@ import { getFincas, type Finca } from '@/api/fincas'
 import { estimarPesoDesdeImagen, type MLEstimacion } from '@/api/ml'
 import { alertController, actionSheetController } from '@ionic/vue'
 import { usePermisosGanado } from '@/composables/usePermisosGanado'
+import { useOfflineSync } from '@/composables/useOfflineSync'
+import { useToast } from '@/composables/useToast'
+import { useI18n } from 'vue-i18n'
+
+const { isOnline, enqueue } = useOfflineSync()
+const toast = useToast()
+const { t } = useI18n()
 
 const route = useRoute()
 const router = useRouter()
@@ -121,7 +129,7 @@ async function abrirSelectorEstadoSalud() {
   if (!puedeEditarEstadoSalud.value || !animal.value) return
 
   const sheet = await actionSheetController.create({
-    header: 'Estado de salud',
+    header: t('detalle.healthStateSheetTitle'),
     buttons: [
       ...estadosSalud.value.map((estado) => ({
         text: estado.nombre,
@@ -130,15 +138,15 @@ async function abrirSelectorEstadoSalud() {
             animal.value = await actualizarEstadoSalud(animal.value!.id, estado.id)
           } catch (e: any) {
             const alert = await alertController.create({
-              header: 'No se pudo actualizar',
-              message: e?.response?.data?.message ?? 'Ocurrió un error al actualizar el estado de salud.',
+              header: t('detalle.updateErrorTitle'),
+              message: e?.response?.data?.message ?? t('detalle.updateErrorDefault'),
               buttons: ['OK'],
             })
             await alert.present()
           }
         },
       })),
-      { text: 'Cancelar', role: 'cancel' },
+      { text: t('common.cancel'), role: 'cancel' },
     ],
   })
   await sheet.present()
@@ -163,11 +171,11 @@ async function tomarFotoDesde(source: CameraSource) {
 
 async function seleccionarFoto() {
   const sheet = await actionSheetController.create({
-    header: 'Foto del animal',
+    header: t('home.ganadero.photoLabel'),
     buttons: [
-      { text: 'Tomar foto', icon: cameraOutline, handler: () => { tomarFotoDesde(CameraSource.Camera) } },
-      { text: 'Elegir de galería', icon: imagesOutline, handler: () => { tomarFotoDesde(CameraSource.Photos) } },
-      { text: 'Cancelar', role: 'cancel' },
+      { text: t('home.ganadero.takePhotoOption'), icon: cameraOutline, handler: () => { tomarFotoDesde(CameraSource.Camera) } },
+      { text: t('home.ganadero.chooseFromGallery'), icon: imagesOutline, handler: () => { tomarFotoDesde(CameraSource.Photos) } },
+      { text: t('common.cancel'), role: 'cancel' },
     ],
   })
   await sheet.present()
@@ -178,11 +186,30 @@ async function estimarConIA() {
 
   if (!form.raza) {
     const alert = await alertController.create({
-      header: 'Selecciona la raza',
-      message: 'Para una mejor estimación, selecciona la raza del animal antes de estimar.',
+      header: t('home.ganadero.selectBreedTitle'),
+      message: t('home.ganadero.selectBreedMessage'),
       buttons: ['OK'],
     })
     await alert.present()
+    return
+  }
+
+  const breed = RAZA_TO_BREED[form.raza] ?? 'default'
+
+  if (!isOnline.value) {
+    // Sin conexión: la estimación por IA requiere el microservicio ML, así que
+    // se guarda la foto localmente y se encola para procesarla al volver la red.
+    if (!animal.value) return
+    try {
+      const base64 = foto.value.replace(/^data:image\/\w+;base64,/, '')
+      const fotoPath = `pending-estimaciones/${animal.value.id}-${Date.now()}.jpg`
+      await Filesystem.writeFile({ path: fotoPath, data: base64, directory: Directory.Data, recursive: true })
+      await enqueue('ml.estimar', { ganadoId: animal.value.id, fotoPath, breed })
+      toast.warning(t('detalle.offlinePhotoSavedToast'))
+    } catch (e) {
+      console.error(e)
+      toast.error(t('detalle.photoSaveErrorToast'))
+    }
     return
   }
 
@@ -190,7 +217,6 @@ async function estimarConIA() {
   resultadoML.value = null
   fotoAnotada.value = null
   try {
-    const breed = RAZA_TO_BREED[form.raza] ?? 'default'
     const resultado = await estimarPesoDesdeImagen(foto.value, breed)
     resultadoML.value = resultado
     if (resultado.imagen_anotada) fotoAnotada.value = resultado.imagen_anotada
@@ -199,9 +225,9 @@ async function estimarConIA() {
     const msg =
       e?.response?.data?.sugerencia ??
       e?.response?.data?.error ??
-      'No se pudo estimar el peso. Asegúrese de que el animal sea visible de perfil y bien iluminado.'
+      t('home.ganadero.estimateErrorDefault')
     const alert = await alertController.create({
-      header: 'No se detectó el animal',
+      header: t('home.ganadero.noAnimalDetected'),
       message: msg,
       buttons: ['OK'],
     })
@@ -215,7 +241,7 @@ async function guardar() {
   if (!form.arete || !form.nombre || !form.sexo || !form.raza || !form.estado_comercial_id) return
   if (!animal.value) return
   try {
-    await updateGanado(animal.value.id, {
+    const datos = {
       finca_id: form.finca_id,
       arete: form.arete,
       nombre: form.nombre,
@@ -224,10 +250,22 @@ async function guardar() {
       estado_comercial_id: form.estado_comercial_id,
       estado_salud_id: animal.value.estado_salud_id,
       ...(foto.value && { imagen: foto.value }),
-    })
+    }
 
     // El peso se guarda como registro de peso (tabla aparte), solo si cambió.
     const pesoNuevo = form.peso_kg !== '' ? Number(form.peso_kg) : null
+
+    if (!isOnline.value) {
+      await enqueue('ganado.update', { ganadoId: animal.value.id, data: datos })
+      if (pesoNuevo != null && pesoNuevo !== animal.value.peso_kg) {
+        await enqueue('peso.registrar', { ganadoId: animal.value.id, peso: pesoNuevo })
+      }
+      toast.warning(t('common.offlineSavedToast'))
+      showModal.value = false
+      return
+    }
+
+    await updateGanado(animal.value.id, datos)
     if (pesoNuevo != null && pesoNuevo !== animal.value.peso_kg) {
       await registrarPeso(animal.value.id, pesoNuevo)
     }
@@ -253,7 +291,7 @@ onMounted(cargar)
         <ion-buttons slot="start">
           <ion-back-button default-href="/tabs/fincas" />
         </ion-buttons>
-        <ion-title>Gestión Ganadera</ion-title>
+        <ion-title>{{ t('detalle.title') }}</ion-title>
         <ion-buttons slot="end">
           <ion-button v-if="puedeEditarCompleto" fill="clear" :disabled="!animal" @click="abrirEditar">
             <ion-icon :icon="createOutline" />
@@ -276,13 +314,13 @@ onMounted(cargar)
 
           <!-- FOTO -->
           <div class="foto-card">
-            <img v-if="animal.imagen" :src="animal.imagen" class="foto-img" alt="Foto del animal" />
+            <img v-if="animal.imagen" :src="animal.imagen" class="foto-img" :alt="t('home.ganadero.photoLabel')" />
             <div v-else class="foto-placeholder">
               <ion-icon :icon="logoBuffer" class="foto-placeholder-icon" />
             </div>
 
             <div class="foto-badge">
-              {{ animal.estado_salud?.nombre ?? 'Activo' }}
+              {{ animal.estado_salud?.nombre ?? t('detalle.defaultStatus') }}
             </div>
 
             <div class="foto-overlay">
@@ -297,7 +335,7 @@ onMounted(cargar)
               <ion-icon :icon="scaleOutline" />
             </div>
             <div class="peso-info">
-              <div class="peso-label">Último peso</div>
+              <div class="peso-label">{{ t('detalle.lastWeight') }}</div>
               <div class="peso-valor">
                 {{ animal.peso_kg != null ? animal.peso_kg : '—' }}
                 <span class="peso-unidad">kg</span>
@@ -308,11 +346,11 @@ onMounted(cargar)
           <!-- DATOS -->
           <div class="info-grid">
             <div class="info-col">
-              <div class="info-titulo">RAZA</div>
+              <div class="info-titulo">{{ t('detalle.breedTitle') }}</div>
               <div class="info-valor">{{ animal.raza }}</div>
               <div class="info-sub">
                 <span class="dot dot-rojo" />
-                {{ animal.sexo ?? 'Sin sexo' }}
+                {{ animal.sexo ?? t('detalle.noSex') }}
               </div>
             </div>
 
@@ -321,11 +359,11 @@ onMounted(cargar)
               :class="{ 'info-col-tocable': puedeEditarEstadoSalud }"
               @click="puedeEditarEstadoSalud ? abrirSelectorEstadoSalud() : undefined"
             >
-              <div class="info-titulo">ESTADO</div>
+              <div class="info-titulo">{{ t('detalle.stateTitle') }}</div>
               <div class="info-valor">{{ animal[campoEstadoPrincipal]?.nombre ?? '—' }}</div>
               <div class="info-sub">
                 <span class="dot" :class="puedeEditarEstadoSalud ? 'dot-azul' : 'dot-verde'" />
-                {{ puedeEditarEstadoSalud ? 'Toca para cambiar' : (animal.estado_salud?.nombre ?? '—') }}
+                {{ puedeEditarEstadoSalud ? t('detalle.tapToChange') : (animal.estado_salud?.nombre ?? '—') }}
               </div>
             </div>
           </div>
@@ -333,13 +371,13 @@ onMounted(cargar)
           <!-- HISTORIAL -->
           <ion-button expand="block" color="primary" class="btn-historial" @click="verHistorial">
             <ion-icon :icon="refreshCircleOutline" slot="start" />
-            Ver historial completo
+            {{ t('detalle.viewFullHistory') }}
           </ion-button>
 
         </div>
 
         <div v-else class="estado-centro">
-          <p>No se encontró el animal.</p>
+          <p>{{ t('detalle.notFound') }}</p>
         </div>
 
       </div>
@@ -349,7 +387,7 @@ onMounted(cargar)
     <ion-modal :is-open="showModal" @did-dismiss="showModal = false">
       <ion-header>
         <ion-toolbar>
-          <ion-title>Editar Animal</ion-title>
+          <ion-title>{{ t('animales.editAnimal') }}</ion-title>
           <ion-buttons slot="end">
             <ion-button fill="clear" @click="showModal = false">✕</ion-button>
           </ion-buttons>
@@ -360,17 +398,17 @@ onMounted(cargar)
 
         <!-- FOTO -->
         <div class="form-group">
-          <label class="form-label">Foto del animal</label>
+          <label class="form-label">{{ t('home.ganadero.photoLabel') }}</label>
           <div v-if="foto" class="foto-preview-container">
-            <img :src="foto" class="foto-preview" alt="Foto del animal" />
+            <img :src="foto" class="foto-preview" :alt="t('home.ganadero.photoLabel')" />
             <ion-button fill="clear" size="small" class="foto-change-btn" @click="seleccionarFoto">
               <ion-icon :icon="cameraOutline" slot="start" />
-              Cambiar foto
+              {{ t('home.ganadero.changePhoto') }}
             </ion-button>
           </div>
           <ion-button v-else expand="block" fill="outline" color="medium" @click="seleccionarFoto">
             <ion-icon :icon="cameraOutline" slot="start" />
-            Tomar foto / Cargar imagen
+            {{ t('home.ganadero.takePhotoOrUpload') }}
           </ion-button>
         </div>
 
@@ -385,23 +423,23 @@ onMounted(cargar)
           >
             <ion-spinner v-if="estimandoPeso" name="crescent" slot="start" />
             <ion-icon v-else :icon="sparklesOutline" slot="start" />
-            {{ estimandoPeso ? 'Estimando...' : 'Estimar peso con IA' }}
+            {{ estimandoPeso ? t('home.ganadero.estimating') : t('home.ganadero.estimateWithAI') }}
           </ion-button>
           <div v-if="resultadoML" class="ml-resultado">
-            <img v-if="fotoAnotada" :src="fotoAnotada" class="foto-anotada" alt="Animal detectado" />
-            <div class="ml-peso">~{{ resultadoML.peso_estimado_kg }} kg estimados</div>
-            <div class="ml-rango">Rango: {{ resultadoML.rango_min_kg }} – {{ resultadoML.rango_max_kg }} kg · Confianza: {{ Math.round(resultadoML.confianza * 100) }}%</div>
+            <img v-if="fotoAnotada" :src="fotoAnotada" class="foto-anotada" :alt="t('home.ganadero.noAnimalDetected')" />
+            <div class="ml-peso">{{ t('home.ganadero.estimatedWeight', { weight: resultadoML.peso_estimado_kg }) }}</div>
+            <div class="ml-rango">{{ t('home.ganadero.rangeConfidence', { min: resultadoML.rango_min_kg, max: resultadoML.rango_max_kg, confidence: Math.round(resultadoML.confianza * 100) }) }}</div>
             <div v-if="resultadoML.advertencia" class="ml-advertencia">{{ resultadoML.advertencia }}</div>
           </div>
         </div>
 
         <!-- PESO -->
         <div class="form-group">
-          <label class="form-label">Peso (kg)</label>
+          <label class="form-label">{{ t('animales.weightLabel') }}</label>
           <ion-input
             v-model="form.peso_kg"
             type="number"
-            placeholder="Ej: 450"
+            :placeholder="t('animales.weightPlaceholder')"
             class="form-input"
             fill="outline"
             inputmode="decimal"
@@ -409,46 +447,46 @@ onMounted(cargar)
         </div>
 
         <div class="form-group">
-          <label class="form-label">Número de Identificación *</label>
-          <ion-input v-model="form.arete" placeholder="Ej: 01239" class="form-input" fill="outline" />
+          <label class="form-label">{{ t('animales.idLabel') }}</label>
+          <ion-input v-model="form.arete" :placeholder="t('animales.idPlaceholder')" class="form-input" fill="outline" />
         </div>
 
         <div class="form-group">
-          <label class="form-label">Nombre *</label>
-          <ion-input v-model="form.nombre" placeholder="Ej: Vaca 50" class="form-input" fill="outline" />
+          <label class="form-label">{{ t('animales.nameLabel') }}</label>
+          <ion-input v-model="form.nombre" :placeholder="t('animales.namePlaceholder')" class="form-input" fill="outline" />
         </div>
 
         <div class="form-group">
-          <label class="form-label">Finca *</label>
+          <label class="form-label">{{ t('animales.farmLabel') }}</label>
           <ion-select v-model="form.finca_id" class="form-select" fill="outline">
             <ion-select-option v-for="f in fincas" :key="f.id" :value="f.id">{{ f.nombre }}</ion-select-option>
           </ion-select>
         </div>
 
         <div class="form-group">
-          <label class="form-label">Raza *</label>
-          <ion-select v-model="form.raza" placeholder="Selecciona la raza" class="form-select" fill="outline">
+          <label class="form-label">{{ t('home.ganadero.breedLabel') }}</label>
+          <ion-select v-model="form.raza" :placeholder="t('home.ganadero.selectBreed')" class="form-select" fill="outline">
             <ion-select-option v-for="r in RAZAS" :key="r" :value="r">{{ r }}</ion-select-option>
           </ion-select>
         </div>
 
         <div class="form-group">
-          <label class="form-label">Sexo *</label>
-          <ion-select v-model="form.sexo" placeholder="Selecciona el sexo" class="form-select" fill="outline">
+          <label class="form-label">{{ t('animales.sexLabel') }}</label>
+          <ion-select v-model="form.sexo" :placeholder="t('animales.selectSex')" class="form-select" fill="outline">
             <ion-select-option v-for="s in SEXOS" :key="s" :value="s">{{ s }}</ion-select-option>
           </ion-select>
         </div>
 
         <div class="form-group">
-          <label class="form-label">Estado *</label>
-          <ion-select v-model="form.estado_comercial_id" placeholder="Selecciona el estado" class="form-select" fill="outline">
+          <label class="form-label">{{ t('animales.stateLabel') }}</label>
+          <ion-select v-model="form.estado_comercial_id" :placeholder="t('animales.selectState')" class="form-select" fill="outline">
             <ion-select-option v-for="e in estadosComerciales" :key="e.id" :value="e.id">{{ e.nombre }}</ion-select-option>
           </ion-select>
         </div>
 
         <div class="modal-actions">
-          <ion-button expand="block" fill="outline" @click="showModal = false">Cancelar</ion-button>
-          <ion-button expand="block" color="primary" @click="guardar">Actualizar Animal</ion-button>
+          <ion-button expand="block" fill="outline" @click="showModal = false">{{ t('common.cancel') }}</ion-button>
+          <ion-button expand="block" color="primary" @click="guardar">{{ t('animales.updateAnimal') }}</ion-button>
         </div>
       </ion-content>
     </ion-modal>
@@ -457,7 +495,7 @@ onMounted(cargar)
 
 <style scoped>
 .wrap {
-  background: #f0f4f8;
+  background: var(--ion-background-color);
   min-height: 100%;
 }
 
@@ -504,8 +542,8 @@ onMounted(cargar)
   position: absolute;
   top: 14px;
   left: 14px;
-  background: #ffffff;
-  color: #2e7d32;
+  background: var(--bov-surface);
+  color: var(--bov-success-soft-text);
   font-size: 0.72rem;
   font-weight: 700;
   text-transform: uppercase;
@@ -543,7 +581,7 @@ onMounted(cargar)
   align-items: center;
   gap: 14px;
   margin: 0 16px;
-  background: #e7f5e9;
+  background: var(--bov-success-soft-bg);
   border-radius: 16px;
   padding: 16px 18px;
 }
@@ -552,7 +590,7 @@ onMounted(cargar)
   width: 46px;
   height: 46px;
   border-radius: 12px;
-  background: #ffffff;
+  background: var(--bov-surface);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -561,19 +599,19 @@ onMounted(cargar)
 
 .peso-icono ion-icon {
   font-size: 24px;
-  color: #2e7d32;
+  color: var(--bov-success-soft-text);
 }
 
 .peso-label {
   font-size: 0.82rem;
-  color: #4caf50;
+  color: var(--bov-success-soft-text);
   font-weight: 600;
 }
 
 .peso-valor {
   font-size: 1.9rem;
   font-weight: 800;
-  color: #1b5e20;
+  color: var(--bov-success-soft-text);
   line-height: 1.1;
 }
 
@@ -606,7 +644,7 @@ onMounted(cargar)
 .info-valor {
   font-size: 1.15rem;
   font-weight: 700;
-  color: var(--ion-color-dark);
+  color: var(--bov-text-strong);
   margin-bottom: 8px;
 }
 
@@ -655,7 +693,7 @@ onMounted(cargar)
 /* MODAL */
 .modal-content { --padding-top: 16px; }
 .form-group { margin-bottom: 16px; }
-.form-label { display: block; font-size: 0.9rem; font-weight: 600; color: var(--ion-color-dark); margin-bottom: 6px; }
+.form-label { display: block; font-size: 0.9rem; font-weight: 600; color: var(--bov-text-strong); margin-bottom: 6px; }
 .form-input, .form-select { --border-radius: 10px; width: 100%; }
 .modal-actions { display: flex; flex-direction: column; gap: 8px; margin-top: 24px; }
 
@@ -665,7 +703,7 @@ onMounted(cargar)
 .foto-anotada { width: 100%; border-radius: 8px; margin-bottom: 10px; border: 2px solid #00c84a; }
 
 .ml-resultado { margin-top: 10px; padding: 12px 14px; background: var(--ion-color-tertiary-tint, #f0eaff); border-radius: 10px; border-left: 4px solid var(--ion-color-tertiary, #7044ff); }
-.ml-peso { font-size: 1.2rem; font-weight: 700; color: var(--ion-color-dark); }
+.ml-peso { font-size: 1.2rem; font-weight: 700; color: var(--bov-text-strong); }
 .ml-rango { font-size: 0.82rem; color: var(--ion-color-medium); margin-top: 2px; }
 .ml-advertencia { font-size: 0.78rem; color: var(--ion-color-warning-shade, #b7660a); margin-top: 6px; }
 </style>

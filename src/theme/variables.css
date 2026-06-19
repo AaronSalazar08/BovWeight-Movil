@@ -86,6 +86,31 @@
   --ion-color-step-850: #1a1a1a;
 
   --ion-font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+
+  /* ── Tokens semánticos para <style scoped> de las vistas ──────────────────
+     Estos cubren los casos donde cada página fija sus propios colores en
+     lugar de heredar las variables de Ionic (tarjetas, texto secundario,
+     bordes, sombras, cajas de aviso). Se redefinen en html.dark más abajo. */
+  --bov-surface: #ffffff;
+  --bov-text-strong: #1a1a1a;
+  --bov-text-muted: #888888;
+  --bov-text-faint: #cccccc;
+  --bov-border: #f0f0f0;
+  --bov-shadow: rgba(0, 0, 0, 0.06);
+  --bov-tint-soft: rgba(0, 128, 128, 0.1);
+  --bov-track-bg: #e0e0e0;
+
+  --bov-danger-soft-bg: #fef2f2;
+  --bov-danger-soft-border: #fecaca;
+
+  --bov-warning-soft-bg: #fff8e1;
+  --bov-warning-soft-border: #ffe082;
+  --bov-warning-soft-text: #795548;
+  --bov-warning-soft-icon: #f57c00;
+
+  --bov-success-soft-bg: #e8f5e9;
+  --bov-success-soft-border: #a5d6a7;
+  --bov-success-soft-text: #2e7d32;
 }
 
 /* ── Contraste global ────────────────────────────────────────────────────── */
@@ -94,15 +119,15 @@ ion-app {
   filter: contrast(1.03);
 }
 
-/* ── Forzar texto negro en todos los componentes Ionic ───────────────────── */
+/* ── Color de texto/fondo de componentes Ionic, según el tema activo ─────── */
 
 ion-content {
-  --color: #1a1a1a;
+  --color: var(--ion-text-color);
 }
 
 ion-searchbar {
-  --background: #ffffff;
-  --color: #1a1a1a;
+  --background: var(--ion-item-background);
+  --color: var(--ion-text-color);
   --icon-color: #555555;
   --placeholder-color: #9e9e9e;
   --border-radius: 10px;
@@ -173,67 +198,98 @@ ion-alert,
 }
 
 ion-item {
-  --color: #1a1a1a;
-  --detail-icon-color: #1a1a1a;
+  --color: var(--ion-text-color);
+  --detail-icon-color: var(--ion-text-color);
+  --background: var(--ion-item-background);
 }
 
 ion-label {
-  --color: #1a1a1a;
+  --color: var(--ion-text-color);
 }
 
 ion-input {
-  --color: #1a1a1a;
+  --color: var(--ion-text-color);
   --placeholder-color: #9e9e9e;
 }
 
 ion-textarea {
-  --color: #1a1a1a;
+  --color: var(--ion-text-color);
   --placeholder-color: #9e9e9e;
 }
 
 ion-select {
-  --color: #1a1a1a;
+  --color: var(--ion-text-color);
   --placeholder-color: #9e9e9e;
 }
 
 ion-list-header {
-  --color: #1a1a1a;
+  --color: var(--ion-text-color);
 }
 
 ion-note {
   --color: #555555;
 }
 
-/* Texto nativo dentro de contenedores claros */
+/* Texto nativo dentro de contenedores que no fijan su propio color */
 .register-wrapper,
 .forgot-wrapper,
 .reset-wrapper,
 .success-content,
 .sent-state,
 .success-state {
-  color: #1a1a1a;
+  color: var(--ion-text-color);
 }
 
-/* Modo oscuro (sistema) */
-@media (prefers-color-scheme: dark) {
-  body {
-    --ion-color-primary: #66b2b2;
-    --ion-color-primary-rgb: 102, 178, 178;
-    --ion-color-primary-contrast: #000000;
-    --ion-color-primary-contrast-rgb: 0, 0, 0;
-    --ion-color-primary-shade: #008080;
-    --ion-color-primary-tint: #b2d8d8;
+html.dark ion-note {
+  --color: #9aa0a6;
+}
 
-    --ion-background-color: #121212;
-    --ion-background-color-rgb: 18, 18, 18;
+/* ── Modo oscuro ──────────────────────────────────────────────────────────
+   Controlado manualmente por useDark()/useTema() (@vueuse/core), que agrega
+   la clase .dark a <html>. Por defecto sigue prefers-color-scheme hasta que
+   el usuario elige un tema explícito en Perfil > Configuración; a partir de
+   ahí esta clase manda, sin importar la preferencia del sistema operativo.
+   (Antes esto era un @media (prefers-color-scheme: dark) automático; se
+   reemplazó por selector de clase para que la elección del usuario nunca
+   sea sobrescrita por el sistema.) */
+html.dark {
+  --ion-color-primary: #66b2b2;
+  --ion-color-primary-rgb: 102, 178, 178;
+  --ion-color-primary-contrast: #000000;
+  --ion-color-primary-contrast-rgb: 0, 0, 0;
+  --ion-color-primary-shade: #008080;
+  --ion-color-primary-tint: #b2d8d8;
 
-    --ion-text-color: #ffffff;
-    --ion-text-color-rgb: 255, 255, 255;
+  --ion-background-color: #121212;
+  --ion-background-color-rgb: 18, 18, 18;
 
-    --ion-card-background: #1e1e1e;
+  --ion-text-color: #ffffff;
+  --ion-text-color-rgb: 255, 255, 255;
 
-    --ion-item-background: #1e1e1e;
+  --ion-card-background: #1e1e1e;
 
-    --ion-toolbar-background: #004c4c;
-  }
+  --ion-item-background: #1e1e1e;
+
+  --ion-toolbar-background: #004c4c;
+
+  --bov-surface: #1e1e1e;
+  --bov-text-strong: #f1f1f1;
+  --bov-text-muted: #9aa0a6;
+  --bov-text-faint: #6b7075;
+  --bov-border: rgba(255, 255, 255, 0.08);
+  --bov-shadow: rgba(0, 0, 0, 0.4);
+  --bov-tint-soft: rgba(102, 178, 178, 0.18);
+  --bov-track-bg: rgba(255, 255, 255, 0.15);
+
+  --bov-danger-soft-bg: rgba(235, 68, 90, 0.12);
+  --bov-danger-soft-border: rgba(235, 68, 90, 0.35);
+
+  --bov-warning-soft-bg: rgba(255, 196, 9, 0.12);
+  --bov-warning-soft-border: rgba(255, 196, 9, 0.35);
+  --bov-warning-soft-text: #ffca22;
+  --bov-warning-soft-icon: #ffca22;
+
+  --bov-success-soft-bg: rgba(0, 128, 128, 0.16);
+  --bov-success-soft-border: rgba(102, 178, 178, 0.4);
+  --bov-success-soft-text: #66b2b2;
 }
