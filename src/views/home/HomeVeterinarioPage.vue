@@ -2,7 +2,7 @@
   <ion-page>
     <ion-header>
       <ion-toolbar color="primary">
-        <ion-title>BovWeight CR</ion-title>
+        <ion-title>{{ t('common.appName') }}</ion-title>
         <ion-buttons slot="end">
           <ion-button @click="handleLogout">
             <ion-icon slot="icon-only" :icon="logOutOutline" />
@@ -23,9 +23,9 @@
             <ion-icon :icon="medkitOutline" class="avatar-icon" />
           </div>
           <div class="welcome-text">
-            <p class="greeting">Bienvenido,</p>
+            <p class="greeting">{{ t('home.common.greeting') }}</p>
             <h2 class="user-name">{{ authStore.userDisplayName }}</h2>
-            <ion-badge color="tertiary">Veterinario</ion-badge>
+            <ion-badge color="tertiary">{{ t('home.veterinario.roleBadge') }}</ion-badge>
           </div>
         </div>
       </div>
@@ -37,7 +37,7 @@
             <ion-icon :icon="businessOutline" class="stat-icon" />
           </div>
           <p class="stat-value">{{ totalFincas }}</p>
-          <p class="stat-label">Fincas Asignadas</p>
+          <p class="stat-label">{{ t('home.veterinario.statFarmsAssigned') }}</p>
         </div>
 
         <div class="stat-card">
@@ -45,7 +45,7 @@
             <ion-icon :icon="pawOutline" class="stat-icon" />
           </div>
           <p class="stat-value">{{ totalAnimales }}</p>
-          <p class="stat-label">Animales</p>
+          <p class="stat-label">{{ t('home.common.statAnimals') }}</p>
         </div>
       </div>
 
@@ -54,14 +54,14 @@
           <div class="stat-icon-wrap">
             <ion-icon :icon="scaleOutline" class="stat-icon" />
           </div>
-          <p class="weight-label">Peso Promedio</p>
+          <p class="weight-label">{{ t('home.common.avgWeight') }}</p>
         </div>
         <p class="weight-value">{{ pesoPromedio }}<span class="weight-unit"> kg</span></p>
       </div>
 
       <!-- Acceso rápido -->
       <div class="section-title">
-        <h3>Acceso Rápido</h3>
+        <h3>{{ t('home.common.quickAccess') }}</h3>
       </div>
 
       <div class="quick-access">
@@ -71,8 +71,8 @@
               <ion-icon :icon="businessOutline" class="quick-icon" />
             </div>
             <div class="quick-text">
-              <p class="quick-title">Fincas Asignadas</p>
-              <p class="quick-subtitle">Ver fincas</p>
+              <p class="quick-title">{{ t('home.veterinario.farmsAssigned') }}</p>
+              <p class="quick-subtitle">{{ t('home.veterinario.viewFarms') }}</p>
             </div>
           </div>
           <ion-icon :icon="chevronForwardOutline" class="quick-chevron" />
@@ -84,8 +84,8 @@
               <ion-icon :icon="pawOutline" class="quick-icon" />
             </div>
             <div class="quick-text">
-              <p class="quick-title">Ganado</p>
-              <p class="quick-subtitle">Ver ganado</p>
+              <p class="quick-title">{{ t('home.veterinario.cattle') }}</p>
+              <p class="quick-subtitle">{{ t('home.veterinario.viewCattle') }}</p>
             </div>
           </div>
           <ion-icon :icon="chevronForwardOutline" class="quick-chevron" />
@@ -97,8 +97,8 @@
               <ion-icon :icon="barChartOutline" class="quick-icon" />
             </div>
             <div class="quick-text">
-              <p class="quick-title">Historial General</p>
-              <p class="quick-subtitle">Ver historial</p>
+              <p class="quick-title">{{ t('home.veterinario.generalHistory') }}</p>
+              <p class="quick-subtitle">{{ t('home.veterinario.viewHistory') }}</p>
             </div>
           </div>
           <ion-icon :icon="chevronForwardOutline" class="quick-chevron" />
@@ -107,12 +107,12 @@
 
       <!-- Actividad reciente -->
       <div class="section-title">
-        <h3>Actividad Reciente</h3>
+        <h3>{{ t('home.common.recentActivity') }}</h3>
       </div>
 
       <div class="activity-card">
         <div v-if="!recientes.length" class="activity-empty">
-          Aún no hay pesajes registrados.
+          {{ t('home.common.noWeighings') }}
         </div>
         <div v-else class="activity-row" v-for="reg in recientes" :key="reg.id">
           <img v-if="reg.ganado.imagen" :src="reg.ganado.imagen" class="activity-thumb" :alt="reg.ganado.nombre ?? reg.ganado.arete" />
@@ -120,7 +120,7 @@
             <ion-icon :icon="scaleOutline" class="activity-icon" />
           </div>
           <div class="activity-info">
-            <p class="activity-name">{{ reg.ganado.nombre ?? `Arete ${reg.ganado.arete}` }}</p>
+            <p class="activity-name">{{ reg.ganado.nombre ?? t('home.common.tagLabel', { tag: reg.ganado.arete }) }}</p>
             <p class="activity-date">{{ formatFecha(reg.fecha) }}</p>
           </div>
           <p class="activity-weight">{{ pesoEfectivo(reg) }} kg</p>
@@ -131,8 +131,9 @@
       <div class="legal-notice">
         <ion-icon :icon="informationCircleOutline" />
         <p>
-          Los resultados de estimación de peso son aproximaciones y
-          <strong>no sustituyen mediciones oficiales</strong> con báscula certificada.
+          {{ t('common.legalNoticePrefix') }}
+          <strong>{{ t('common.legalNoticeBold') }}</strong>
+          {{ t('common.legalNoticeSuffix') }}
         </p>
       </div>
     </ion-content>
@@ -142,6 +143,7 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 import {
   IonPage, IonHeader, IonToolbar, IonTitle, IonContent,
   IonButtons, IonButton, IonIcon, IonBadge,
@@ -160,6 +162,7 @@ import { getPesajesRecientes, type RegistroPesoConGanado } from '@/api/reportes'
 
 const router = useRouter()
 const authStore = useAuthStore()
+const { t, locale } = useI18n()
 
 const ganado = ref<Ganado[]>([])
 const fincas = ref<Finca[]>([])
@@ -197,19 +200,19 @@ function pesoEfectivo(reg: RegistroPesoConGanado): string {
 
 function formatFecha(fecha: string): string {
   const [y, m, d] = fecha.substring(0, 10).split('-').map(Number)
-  return new Date(y, m - 1, d).toLocaleDateString('es-CR', {
+  return new Date(y, m - 1, d).toLocaleDateString(locale.value === 'es-LA' ? 'es-CR' : 'en-US', {
     day: '2-digit', month: 'short', year: 'numeric',
   })
 }
 
 async function handleLogout() {
   const alert = await alertController.create({
-    header: 'Cerrar sesión',
-    message: '¿Estás seguro de que deseas salir?',
+    header: t('common.logoutConfirmTitle'),
+    message: t('common.logoutConfirmMessage'),
     buttons: [
-      { text: 'Cancelar', role: 'cancel' },
+      { text: t('common.cancel'), role: 'cancel' },
       {
-        text: 'Cerrar sesión',
+        text: t('common.logout'),
         role: 'destructive',
         handler: async () => {
           await authStore.logout()

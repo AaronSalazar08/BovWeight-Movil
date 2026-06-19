@@ -7,7 +7,7 @@
             <ion-icon :icon="arrowBackOutline" />
           </ion-button>
         </ion-buttons>
-        <ion-title>Mi Perfil</ion-title>
+        <ion-title>{{ t('perfil.title') }}</ion-title>
       </ion-toolbar>
     </ion-header>
 
@@ -26,7 +26,7 @@
         <ion-item>
           <ion-icon :icon="mailOutline" slot="start" color="primary" />
           <ion-label>
-            <p>Correo electrónico</p>
+            <p>{{ t('perfil.email') }}</p>
             <h3>{{ authStore.user?.correo }}</h3>
           </ion-label>
         </ion-item>
@@ -34,7 +34,7 @@
         <ion-item>
           <ion-icon :icon="shieldCheckmarkOutline" slot="start" color="primary" />
           <ion-label>
-            <p>Rol</p>
+            <p>{{ t('perfil.role') }}</p>
             <h3>{{ authStore.user?.tipo }}</h3>
           </ion-label>
         </ion-item>
@@ -42,7 +42,7 @@
         <ion-item>
           <ion-icon :icon="calendarOutline" slot="start" color="primary" />
           <ion-label>
-            <p>Miembro desde</p>
+            <p>{{ t('perfil.memberSince') }}</p>
             <h3>{{ memberSince }}</h3>
           </ion-label>
         </ion-item>
@@ -50,9 +50,13 @@
 
       <!-- Acciones -->
       <ion-list inset>
+        <ion-item button @click="router.push({ name: 'Configuracion' })">
+          <ion-icon :icon="settingsOutline" slot="start" color="primary" />
+          <ion-label>{{ t('perfil.settings') }}</ion-label>
+        </ion-item>
         <ion-item button @click="handleLogout">
           <ion-icon :icon="logOutOutline" slot="start" color="danger" />
-          <ion-label color="danger">Cerrar sesión</ion-label>
+          <ion-label color="danger">{{ t('common.logout') }}</ion-label>
         </ion-item>
       </ion-list>
 
@@ -60,8 +64,9 @@
       <div class="legal-notice">
         <ion-icon :icon="informationCircleOutline" />
         <p>
-          Los resultados de estimación de peso son aproximaciones y
-          <strong>no sustituyen mediciones oficiales</strong> con báscula certificada.
+          {{ t('common.legalNoticePrefix') }}
+          <strong>{{ t('common.legalNoticeBold') }}</strong>
+          {{ t('common.legalNoticeSuffix') }}
         </p>
       </div>
     </ion-content>
@@ -71,6 +76,7 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { useRouter } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 import {
   IonPage, IonHeader, IonToolbar, IonTitle, IonContent,
   IonList, IonItem, IonLabel, IonIcon, IonBadge,
@@ -79,14 +85,15 @@ import {
 } from '@ionic/vue'
 import {
   mailOutline, shieldCheckmarkOutline, calendarOutline,
-  logOutOutline, informationCircleOutline, arrowBackOutline,
+  logOutOutline, informationCircleOutline, arrowBackOutline, settingsOutline,
 } from 'ionicons/icons'
 import { useAuthStore } from '@/stores/auth'
 import { format } from 'date-fns'
-import { es } from 'date-fns/locale'
+import { es, enUS } from 'date-fns/locale'
 
 const router = useRouter()
 const authStore = useAuthStore()
+const { t, locale } = useI18n()
 
 const initials = computed(() => {
   const nombre = authStore.user?.nombre ?? ''
@@ -108,8 +115,13 @@ const rolColor = computed(() => {
 const memberSince = computed(() => {
   const fecha = authStore.user?.creado_en
   if (!fecha) return '—'
+  const esLocaleActivo = locale.value === 'es-LA'
   try {
-    return format(new Date(fecha), "d 'de' MMMM, yyyy", { locale: es })
+    return format(
+      new Date(fecha),
+      esLocaleActivo ? "d 'de' MMMM, yyyy" : 'MMMM d, yyyy',
+      { locale: esLocaleActivo ? es : enUS },
+    )
   } catch {
     return fecha
   }
@@ -122,12 +134,12 @@ function irAInicio() {
 
 async function handleLogout() {
   const alert = await alertController.create({
-    header: 'Cerrar sesión',
-    message: '¿Estás seguro de que deseas salir?',
+    header: t('common.logoutConfirmTitle'),
+    message: t('common.logoutConfirmMessage'),
     buttons: [
-      { text: 'Cancelar', role: 'cancel' },
+      { text: t('common.cancel'), role: 'cancel' },
       {
-        text: 'Cerrar sesión',
+        text: t('common.logout'),
         role: 'destructive',
         handler: async () => {
           await authStore.logout()

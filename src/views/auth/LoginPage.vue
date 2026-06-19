@@ -7,20 +7,20 @@
           <div class="logo-circle">
             <ion-icon :icon="leafOutline" class="logo-icon" />
           </div>
-          <h1 class="app-title">BovWeight CR</h1>
-          <p class="app-subtitle">Gestión de ganado inteligente</p>
+          <h1 class="app-title">{{ t('common.appName') }}</h1>
+          <p class="app-subtitle">{{ t('auth.login.subtitle') }}</p>
         </div>
 
         <!-- Formulario -->
         <div class="login-card">
-          <h2 class="form-title">Iniciar sesión</h2>
+          <h2 class="form-title">{{ t('auth.login.title') }}</h2>
 
           <form @submit.prevent="handleLogin" novalidate>
             <div class="field-group">
               <ion-input
                 v-model="form.correo"
                 type="email"
-                label="Correo electrónico"
+                :label="t('auth.login.emailLabel')"
                 label-placement="floating"
                 fill="outline"
                 placeholder="usuario@ejemplo.com"
@@ -35,7 +35,7 @@
               <ion-input
                 v-model="form.contrasena"
                 :type="showPassword ? 'text' : 'password'"
-                label="Contraseña"
+                :label="t('auth.login.passwordLabel')"
                 label-placement="floating"
                 fill="outline"
                 placeholder="••••••••"
@@ -67,22 +67,22 @@
               class="submit-btn"
             >
               <ion-spinner v-if="isLoading" name="crescent" slot="start" />
-              {{ isLoading ? 'Ingresando...' : 'Iniciar sesión' }}
+              {{ isLoading ? t('auth.login.submitting') : t('auth.login.submit') }}
             </ion-button>
           </form>
 
           <div class="form-links">
             <ion-button fill="clear" size="small" router-link="/forgot-password">
-              ¿Olvidaste tu contraseña?
+              {{ t('auth.login.forgotPassword') }}
             </ion-button>
           </div>
         </div>
 
         <!-- Enlace de registro -->
         <div class="register-link">
-          <span>¿No tienes cuenta?</span>
+          <span>{{ t('auth.login.noAccount') }}</span>
           <ion-button fill="clear" size="small" router-link="/register">
-            Solicitar acceso
+            {{ t('auth.login.requestAccess') }}
           </ion-button>
         </div>
       </div>
@@ -93,6 +93,7 @@
 <script setup lang="ts">
 import { ref, reactive } from 'vue'
 import { useRouter } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 import {
   IonPage, IonContent, IonInput, IonButton, IonIcon, IonSpinner,
 } from '@ionic/vue'
@@ -101,6 +102,7 @@ import { useAuthStore } from '@/stores/auth'
 
 const router = useRouter()
 const authStore = useAuthStore()
+const { t } = useI18n()
 
 const form = reactive({ correo: '', contrasena: '' })
 const errors = reactive({ correo: '', contrasena: '' })
@@ -111,11 +113,11 @@ const showPassword = ref(false)
 function validateCorreo(): boolean {
   errors.correo = ''
   if (!form.correo) {
-    errors.correo = 'El correo electrónico es requerido.'
+    errors.correo = t('auth.login.emailRequired')
     return false
   }
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.correo)) {
-    errors.correo = 'Ingresa un correo electrónico válido.'
+    errors.correo = t('auth.login.emailInvalid')
     return false
   }
   return true
@@ -124,7 +126,7 @@ function validateCorreo(): boolean {
 function validateContrasena(): boolean {
   errors.contrasena = ''
   if (!form.contrasena) {
-    errors.contrasena = 'La contraseña es requerida.'
+    errors.contrasena = t('auth.login.passwordRequired')
     return false
   }
   return true
@@ -146,9 +148,9 @@ async function handleLogin() {
   } catch (err: any) {
     const status = err?.response?.status
     if (status === 401 || status === 422) {
-      loginError.value = 'Credenciales incorrectas. Verifica tu correo y contraseña.'
+      loginError.value = t('auth.login.errorInvalidCredentials')
     } else {
-      loginError.value = 'No se pudo conectar al servidor. Intenta de nuevo.'
+      loginError.value = t('auth.login.errorConnection')
     }
   } finally {
     isLoading.value = false

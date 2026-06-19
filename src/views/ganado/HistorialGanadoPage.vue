@@ -5,7 +5,7 @@
         <ion-buttons slot="start">
           <ion-back-button :default-href="`/tabs/ganado/${animalId}/detalle`" />
         </ion-buttons>
-        <ion-title>Historial de Pesajes</ion-title>
+        <ion-title>{{ t('historial.title') }}</ion-title>
       </ion-toolbar>
     </ion-header>
 
@@ -17,7 +17,7 @@
       <!-- Loading -->
       <div v-if="loading" class="center-state">
         <ion-spinner name="crescent" color="primary" />
-        <p>Cargando historial...</p>
+        <p>{{ t('historial.loading') }}</p>
       </div>
 
       <!-- Error -->
@@ -25,7 +25,7 @@
         <ion-icon :icon="alertCircleOutline" class="state-icon error" />
         <p>{{ error }}</p>
         <ion-button fill="outline" color="primary" size="small" @click="cargarDatos">
-          Reintentar
+          {{ t('fincas.retry') }}
         </ion-button>
       </div>
 
@@ -37,20 +37,20 @@
           </div>
           <div class="animal-info">
             <h2 class="animal-nombre">{{ animal?.nombre ?? '—' }}</h2>
-            <p class="animal-arete">Arete: <strong>{{ animal?.arete ?? '—' }}</strong></p>
+            <p class="animal-arete">{{ t('historial.tagLabel') }} <strong>{{ animal?.arete ?? '—' }}</strong></p>
             <p class="animal-raza">{{ animal?.raza }} · {{ animal?.sexo }}</p>
           </div>
           <div class="registros-badge">
             <span class="badge-num">{{ historial.length }}</span>
-            <span class="badge-lbl">pesajes</span>
+            <span class="badge-lbl">{{ t('historial.recordsBadge') }}</span>
           </div>
         </div>
 
         <!-- Sin registros -->
         <div v-if="!historial.length" class="center-state no-records">
           <ion-icon :icon="scaleOutline" class="state-icon" />
-          <p>Sin registros de pesaje</p>
-          <p class="no-records-sub">Los pesajes realizados con IA aparecerán aquí</p>
+          <p>{{ t('historial.noRecords') }}</p>
+          <p class="no-records-sub">{{ t('historial.noRecordsSub') }}</p>
         </div>
 
         <template v-else>
@@ -61,8 +61,8 @@
                 <ion-icon :icon="calendarOutline" />
                 <span>
                   {{ startDate || endDate
-                    ? `${startDate ? formatFechaCorta(startDate) : 'Inicio'} - ${endDate ? formatFechaCorta(endDate) : 'Fin'}`
-                    : 'Seleccionar rango de fechas' }}
+                    ? `${startDate ? formatFechaCorta(startDate) : t('historial.dateRangeStart')} - ${endDate ? formatFechaCorta(endDate) : t('historial.dateRangeEnd')}`
+                    : t('historial.selectDateRange') }}
                 </span>
               </div>
               <ion-icon
@@ -75,11 +75,11 @@
 
             <div v-if="showDatePicker" class="date-filter-panel">
               <div class="date-filter-field">
-                <label>Fecha inicio</label>
+                <label>{{ t('historial.startDateLabel') }}</label>
                 <input type="date" v-model="startDate" />
               </div>
               <div class="date-filter-field">
-                <label>Fecha fin</label>
+                <label>{{ t('historial.endDateLabel') }}</label>
                 <input type="date" v-model="endDate" />
               </div>
             </div>
@@ -88,14 +88,14 @@
           <!-- Sin resultados tras filtrar -->
           <div v-if="!registrosFiltrados.length" class="center-state no-records">
             <ion-icon :icon="calendarOutline" class="state-icon" />
-            <p>Sin pesajes en ese rango de fechas</p>
+            <p>{{ t('historial.noRecordsInRange') }}</p>
           </div>
 
           <template v-else>
             <!-- Evolución de peso -->
             <div v-if="chartData.length > 1">
               <div class="section-title">
-                <h3>Evolución de Peso</h3>
+                <h3>{{ t('historial.weightEvolution') }}</h3>
               </div>
               <div class="chart-card">
                 <svg :viewBox="`0 0 ${LINE_W} ${LINE_H}`" class="line-svg">
@@ -145,15 +145,15 @@
                   >{{ p.label }}</text>
                 </svg>
                 <div class="chart-footer">
-                  <span class="chart-min">Mín: {{ chartMin.toFixed(1) }} kg</span>
-                  <span class="chart-max">Máx: {{ chartMax.toFixed(1) }} kg</span>
+                  <span class="chart-min">{{ t('historial.min', { weight: chartMin.toFixed(1) }) }}</span>
+                  <span class="chart-max">{{ t('historial.max', { weight: chartMax.toFixed(1) }) }}</span>
                 </div>
               </div>
             </div>
 
             <!-- Lista de registros -->
             <div class="section-title">
-              <h3>Registros ({{ registrosFiltrados.length }})</h3>
+              <h3>{{ t('historial.recordsCount', { count: registrosFiltrados.length }) }}</h3>
             </div>
             <div class="records-list">
               <div
@@ -169,10 +169,10 @@
                   <p class="record-peso">{{ pesoEfectivo(reg) }}<span class="kg-unit"> kg</span></p>
                   <p v-if="esEstimado(reg)" class="record-ia-badge">
                     <ion-icon :icon="sparklesOutline" />
-                    Estimado por IA
+                    {{ t('historial.estimatedByAI') }}
                   </p>
                   <p v-else-if="reg.peso_corregido !== null" class="record-estimado">
-                    Estimado: {{ Number(reg.peso_estimado).toFixed(1) }} kg
+                    {{ t('historial.estimatedLabel', { weight: Number(reg.peso_estimado).toFixed(1) }) }}
                   </p>
                 </div>
               </div>
@@ -199,8 +199,11 @@ import {
 } from 'ionicons/icons'
 import { ref, computed, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 import { getGanado, type Ganado } from '@/api/ganado'
 import { getHistorialPeso, type RegistroPeso } from '@/api/reportes'
+
+const { t, locale } = useI18n()
 
 const LINE_W = 320
 const LINE_H = 160
@@ -244,7 +247,7 @@ async function cargarDatos() {
     }))
   } catch (e) {
     console.error(e)
-    error.value = 'No se pudo cargar el historial. Verifica tu conexión.'
+    error.value = t('historial.loadError')
   } finally {
     loading.value = false
   }
@@ -354,26 +357,30 @@ function parseFechaLocal(fecha: string): Date {
   return new Date(y, m - 1, d)
 }
 
+function localeIntl(): string {
+  return locale.value === 'es-LA' ? 'es-CR' : 'en-US'
+}
+
 function formatFecha(fecha: string): string {
-  return parseFechaLocal(fecha).toLocaleDateString('es-CR', {
+  return parseFechaLocal(fecha).toLocaleDateString(localeIntl(), {
     day: '2-digit', month: 'short', year: 'numeric',
   })
 }
 
 function formatFechaCorta(fecha: string): string {
-  return parseFechaLocal(fecha).toLocaleDateString('es-CR', {
+  return parseFechaLocal(fecha).toLocaleDateString(localeIntl(), {
     day: '2-digit', month: '2-digit', year: 'numeric',
   })
 }
 
 function formatDateShort(fecha: string): string {
-  return parseFechaLocal(fecha).toLocaleDateString('es-CR', {
+  return parseFechaLocal(fecha).toLocaleDateString(localeIntl(), {
     day: '2-digit', month: 'short',
   })
 }
 
 function formatHora(createdAt: string): string {
-  return new Date(createdAt).toLocaleTimeString('es-CR', {
+  return new Date(createdAt).toLocaleTimeString(localeIntl(), {
     hour: '2-digit', minute: '2-digit',
     timeZone: CR_TZ,
   })

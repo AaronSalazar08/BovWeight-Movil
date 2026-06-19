@@ -25,10 +25,18 @@ apiClient.interceptors.request.use((config) => {
   return config
 })
 
+// Endpoints que devuelven 401 sin que eso signifique "sesión expirada":
+// /auth/login con credenciales incorrectas, o /auth/logout cuando el token
+// ya era inválido (logout es best-effort y no debe re-disparar este flujo).
+const AUTH_ENDPOINTS_SIN_CASCADA = ['/auth/login', '/auth/logout']
+
 apiClient.interceptors.response.use(
   (response) => response,
   (error) => {
-    if (error.response?.status === 401) {
+    const url: string = error.config?.url ?? ''
+    const esEndpointSinCascada = AUTH_ENDPOINTS_SIN_CASCADA.some((endpoint) => url.includes(endpoint))
+
+    if (error.response?.status === 401 && !esEndpointSinCascada) {
       tokenStorage.remove()
       // El store o el router guard se encargan de redirigir
       window.dispatchEvent(new CustomEvent('auth:unauthorized'))

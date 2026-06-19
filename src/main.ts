@@ -3,6 +3,8 @@ import { createPinia } from 'pinia'
 import { VueQueryPlugin } from '@tanstack/vue-query'
 import App from './App.vue'
 import router from './router'
+import i18n from './i18n'
+import { useTema } from './composables/useTema'
 
 import { IonicVue } from '@ionic/vue'
 import { defineCustomElements } from '@ionic/pwa-elements/loader'
@@ -26,12 +28,17 @@ import '@ionic/vue/css/display.css'
 /* Theme variables */
 import './theme/variables.css'
 
+// Aplica la clase 'dark' en <html> antes de montar la app, para evitar un
+// parpadeo del tema incorrecto en el primer render.
+useTema()
+
 const app = createApp(App)
 
 app.use(IonicVue)
 app.use(createPinia())
 app.use(router)
 app.use(VueQueryPlugin)
+app.use(i18n)
 
 router.isReady().then(() => {
   app.mount('#app')

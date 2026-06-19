@@ -5,7 +5,7 @@
         <ion-buttons slot="start">
           <ion-back-button default-href="/tabs/home" />
         </ion-buttons>
-        <ion-title>Reportes y Estadísticas</ion-title>
+        <ion-title>{{ t('reportes.title') }}</ion-title>
       </ion-toolbar>
     </ion-header>
 
@@ -17,7 +17,7 @@
       <!-- Loading -->
       <div v-if="loading" class="center-state">
         <ion-spinner name="crescent" color="primary" />
-        <p>Cargando estadísticas...</p>
+        <p>{{ t('reportes.loading') }}</p>
       </div>
 
       <!-- Error -->
@@ -25,46 +25,46 @@
         <ion-icon :icon="alertCircleOutline" class="state-icon error" />
         <p>{{ error }}</p>
         <ion-button fill="outline" color="primary" size="small" @click="cargarDatos">
-          Reintentar
+          {{ t('fincas.retry') }}
         </ion-button>
       </div>
 
       <template v-else>
         <!-- Resumen General -->
         <div class="section-title">
-          <h3>Resumen General</h3>
+          <h3>{{ t('reportes.generalSummary') }}</h3>
         </div>
 
         <div class="stats-grid">
           <div class="stat-card">
             <ion-icon :icon="pawOutline" class="stat-icon" />
             <p class="stat-value">{{ totalAnimales }}</p>
-            <p class="stat-label">Total Animales</p>
+            <p class="stat-label">{{ t('reportes.totalAnimals') }}</p>
           </div>
           <div class="stat-card">
             <ion-icon :icon="scaleOutline" class="stat-icon" />
             <p class="stat-value">{{ pesoPromedio }}<span class="stat-unit"> kg</span></p>
-            <p class="stat-label">Peso Promedio</p>
+            <p class="stat-label">{{ t('home.common.avgWeight') }}</p>
           </div>
           <div class="stat-card">
             <ion-icon :icon="businessOutline" class="stat-icon" />
             <p class="stat-value">{{ totalFincas }}</p>
-            <p class="stat-label">Fincas Activas</p>
+            <p class="stat-label">{{ t('reportes.activeFarms') }}</p>
           </div>
           <div class="stat-card">
             <ion-icon :icon="leafOutline" class="stat-icon" />
             <p class="stat-value">{{ totalRazas }}</p>
-            <p class="stat-label">Razas Distintas</p>
+            <p class="stat-label">{{ t('reportes.distinctBreeds') }}</p>
           </div>
         </div>
 
         <!-- Animales por Finca -->
         <div class="section-title">
-          <h3>Animales por Finca</h3>
+          <h3>{{ t('reportes.animalsByFarm') }}</h3>
         </div>
 
         <div class="chart-card">
-          <div v-if="!animalesPorFinca.length" class="no-data">Sin datos disponibles</div>
+          <div v-if="!animalesPorFinca.length" class="no-data">{{ t('reportes.noData') }}</div>
           <div v-else class="bar-scroll">
             <svg
               :viewBox="`0 0 ${barChartW} ${BAR_H}`"
@@ -115,11 +115,11 @@
 
         <!-- Distribución por Raza -->
         <div class="section-title">
-          <h3>Distribución por Raza</h3>
+          <h3>{{ t('reportes.breedDistribution') }}</h3>
         </div>
 
         <div class="chart-card">
-          <div v-if="!razasDistrib.length" class="no-data">Sin datos disponibles</div>
+          <div v-if="!razasDistrib.length" class="no-data">{{ t('reportes.noData') }}</div>
           <div v-else class="pie-layout">
             <svg viewBox="0 0 200 200" class="pie-svg">
               <g transform="translate(100,100)">
@@ -138,7 +138,7 @@
 
         <!-- Estado Comercial -->
         <div class="section-title">
-          <h3>Estado Comercial</h3>
+          <h3>{{ t('reportes.commercialStatus') }}</h3>
         </div>
 
         <div class="estados-list">
@@ -179,7 +179,10 @@ import {
   alertCircleOutline, pawOutline, businessOutline, leafOutline, scaleOutline,
 } from 'ionicons/icons'
 import { ref, computed, onMounted } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { getTodoElGanado, type Ganado } from '@/api/ganado'
+
+const { t } = useI18n()
 
 const BAR_H = 180
 const BAR_PT = 22
@@ -203,7 +206,7 @@ async function cargarDatos() {
     ganado.value = await getTodoElGanado()
   } catch (e) {
     console.error(e)
-    error.value = 'No se pudieron cargar los datos. Verifica tu conexión.'
+    error.value = t('reportes.loadError')
   } finally {
     loading.value = false
   }
@@ -231,7 +234,7 @@ const totalRazas = computed(() => new Set(ganado.value.map(g => g.raza)).size)
 const animalesPorFinca = computed(() => {
   const map = new Map<string, number>()
   for (const g of ganado.value) {
-    const nombre = g.finca?.nombre ?? `Finca ${g.finca_id}`
+    const nombre = g.finca?.nombre ?? t('reportes.farmFallback', { id: g.finca_id })
     map.set(nombre, (map.get(nombre) ?? 0) + 1)
   }
   return [...map.entries()]
@@ -298,7 +301,7 @@ const pieSlices = computed(() => {
 const estadosComerciales = computed(() => {
   const map = new Map<string, number>()
   for (const g of ganado.value) {
-    const nombre = g.estado_comercial?.nombre ?? 'Sin estado'
+    const nombre = g.estado_comercial?.nombre ?? t('reportes.noState')
     map.set(nombre, (map.get(nombre) ?? 0) + 1)
   }
   const total = ganado.value.length || 1

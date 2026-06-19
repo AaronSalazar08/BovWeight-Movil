@@ -30,6 +30,9 @@ export const useAuthStore = defineStore('auth', () => {
   async function logout() {
     try {
       await authApi.logout()
+    } catch {
+      // Best-effort: si el token ya era inválido (sesión expirada/revocada)
+      // o no hay red, igual limpiamos la sesión local más abajo.
     } finally {
       token.value = null
       user.value = null

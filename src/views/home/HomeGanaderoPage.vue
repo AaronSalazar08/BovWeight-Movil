@@ -2,7 +2,7 @@
   <ion-page>
     <ion-header>
       <ion-toolbar color="primary">
-        <ion-title>BovWeight CR</ion-title>
+        <ion-title>{{ t('common.appName') }}</ion-title>
         <ion-buttons slot="end">
           <ion-button @click="handleLogout">
             <ion-icon slot="icon-only" :icon="logOutOutline" />
@@ -23,9 +23,9 @@
             <ion-icon :icon="personCircleOutline" class="avatar-icon" />
           </div>
           <div class="welcome-text">
-            <p class="greeting">Bienvenido,</p>
+            <p class="greeting">{{ t('home.common.greeting') }}</p>
             <h2 class="user-name">{{ authStore.userDisplayName }}</h2>
-            <ion-badge color="primary">Ganadero</ion-badge>
+            <ion-badge color="primary">{{ t('home.ganadero.roleBadge') }}</ion-badge>
           </div>
         </div>
       </div>
@@ -37,7 +37,7 @@
             <ion-icon :icon="pawOutline" class="stat-icon" />
           </div>
           <p class="stat-value">{{ totalAnimales }}</p>
-          <p class="stat-label">Animales</p>
+          <p class="stat-label">{{ t('home.common.statAnimals') }}</p>
         </div>
 
         <div class="stat-card">
@@ -45,7 +45,7 @@
             <ion-icon :icon="businessOutline" class="stat-icon" />
           </div>
           <p class="stat-value">{{ totalFincas }}</p>
-          <p class="stat-label">Fincas</p>
+          <p class="stat-label">{{ t('home.ganadero.statFarms') }}</p>
         </div>
       </div>
 
@@ -54,14 +54,14 @@
           <div class="stat-icon-wrap">
             <ion-icon :icon="scaleOutline" class="stat-icon" />
           </div>
-          <p class="weight-label">Peso Promedio</p>
+          <p class="weight-label">{{ t('home.common.avgWeight') }}</p>
         </div>
         <p class="weight-value">{{ pesoPromedio }}<span class="weight-unit"> kg</span></p>
       </div>
 
       <!-- Acceso rápido -->
       <div class="section-title">
-        <h3>Acceso Rápido</h3>
+        <h3>{{ t('home.common.quickAccess') }}</h3>
       </div>
 
       <div class="quick-access">
@@ -71,8 +71,8 @@
               <ion-icon :icon="businessOutline" class="quick-icon" />
             </div>
             <div class="quick-text">
-              <p class="quick-title">Mis Fincas</p>
-              <p class="quick-subtitle">Gestiona tus fincas</p>
+              <p class="quick-title">{{ t('home.ganadero.myFarms') }}</p>
+              <p class="quick-subtitle">{{ t('home.ganadero.manageFarms') }}</p>
             </div>
           </div>
           <ion-icon :icon="chevronForwardOutline" class="quick-chevron" />
@@ -84,8 +84,8 @@
               <ion-icon :icon="pawOutline" class="quick-icon" />
             </div>
             <div class="quick-text">
-              <p class="quick-title">Mi Ganado</p>
-              <p class="quick-subtitle">Ver animales</p>
+              <p class="quick-title">{{ t('home.ganadero.myCattle') }}</p>
+              <p class="quick-subtitle">{{ t('home.ganadero.viewAnimals') }}</p>
             </div>
           </div>
           <ion-icon :icon="chevronForwardOutline" class="quick-chevron" />
@@ -97,8 +97,8 @@
               <ion-icon :icon="cameraOutline" class="quick-icon" />
             </div>
             <div class="quick-text">
-              <p class="quick-title">Estimar Peso</p>
-              <p class="quick-subtitle">Estimar ahora</p>
+              <p class="quick-title">{{ t('home.ganadero.estimateWeight') }}</p>
+              <p class="quick-subtitle">{{ t('home.ganadero.estimateNow') }}</p>
             </div>
           </div>
           <ion-icon :icon="chevronForwardOutline" class="quick-chevron" />
@@ -110,8 +110,8 @@
               <ion-icon :icon="barChartOutline" class="quick-icon" />
             </div>
             <div class="quick-text">
-              <p class="quick-title">Reportes</p>
-              <p class="quick-subtitle">Ver estadísticas</p>
+              <p class="quick-title">{{ t('home.ganadero.reports') }}</p>
+              <p class="quick-subtitle">{{ t('home.ganadero.viewStats') }}</p>
             </div>
           </div>
           <ion-icon :icon="chevronForwardOutline" class="quick-chevron" />
@@ -120,12 +120,12 @@
 
       <!-- Actividad reciente -->
       <div class="section-title">
-        <h3>Actividad Reciente</h3>
+        <h3>{{ t('home.common.recentActivity') }}</h3>
       </div>
 
       <div class="activity-card">
         <div v-if="!recientes.length" class="activity-empty">
-          Aún no hay pesajes registrados.
+          {{ t('home.common.noWeighings') }}
         </div>
         <div v-else class="activity-row" v-for="reg in recientes" :key="reg.id">
           <img v-if="reg.ganado.imagen" :src="reg.ganado.imagen" class="activity-thumb" :alt="reg.ganado.nombre ?? reg.ganado.arete" />
@@ -133,7 +133,7 @@
             <ion-icon :icon="scaleOutline" class="activity-icon" />
           </div>
           <div class="activity-info">
-            <p class="activity-name">{{ reg.ganado.nombre ?? `Arete ${reg.ganado.arete}` }}</p>
+            <p class="activity-name">{{ reg.ganado.nombre ?? t('home.common.tagLabel', { tag: reg.ganado.arete }) }}</p>
             <p class="activity-date">{{ formatFecha(reg.fecha) }}</p>
           </div>
           <p class="activity-weight">{{ pesoEfectivo(reg) }} kg</p>
@@ -144,8 +144,9 @@
       <div class="legal-notice">
         <ion-icon :icon="informationCircleOutline" />
         <p>
-          Los resultados de estimación de peso son aproximaciones y
-          <strong>no sustituyen mediciones oficiales</strong> con báscula certificada.
+          {{ t('common.legalNoticePrefix') }}
+          <strong>{{ t('common.legalNoticeBold') }}</strong>
+          {{ t('common.legalNoticeSuffix') }}
         </p>
       </div>
     </ion-content>
@@ -154,7 +155,7 @@
     <ion-modal :is-open="showEstimador" @did-dismiss="cerrarEstimador">
       <ion-header>
         <ion-toolbar>
-          <ion-title>Estimar Peso</ion-title>
+          <ion-title>{{ t('home.ganadero.estimateWeight') }}</ion-title>
           <ion-buttons slot="end">
             <ion-button fill="clear" @click="cerrarEstimador">✕</ion-button>
           </ion-buttons>
@@ -164,24 +165,24 @@
       <ion-content class="ion-padding modal-content">
         <!-- FOTO -->
         <div class="form-group">
-          <label class="form-label">Foto del animal</label>
+          <label class="form-label">{{ t('home.ganadero.photoLabel') }}</label>
           <div v-if="foto" class="foto-preview-container">
-            <img :src="foto" class="foto-preview" alt="Foto del animal" />
+            <img :src="foto" class="foto-preview" :alt="t('home.ganadero.photoLabel')" />
             <ion-button fill="clear" size="small" class="foto-change-btn" @click="seleccionarFoto">
               <ion-icon :icon="cameraOutline" slot="start" />
-              Cambiar foto
+              {{ t('home.ganadero.changePhoto') }}
             </ion-button>
           </div>
           <ion-button v-else expand="block" fill="outline" color="medium" @click="seleccionarFoto">
             <ion-icon :icon="cameraOutline" slot="start" />
-            Tomar foto / Cargar imagen
+            {{ t('home.ganadero.takePhotoOrUpload') }}
           </ion-button>
         </div>
 
         <!-- RAZA -->
         <div v-if="foto" class="form-group">
-          <label class="form-label">Raza *</label>
-          <ion-select v-model="raza" placeholder="Selecciona la raza" class="form-select" fill="outline">
+          <label class="form-label">{{ t('home.ganadero.breedLabel') }}</label>
+          <ion-select v-model="raza" :placeholder="t('home.ganadero.selectBreed')" class="form-select" fill="outline">
             <ion-select-option v-for="r in RAZAS" :key="r" :value="r">{{ r }}</ion-select-option>
           </ion-select>
         </div>
@@ -197,26 +198,26 @@
           >
             <ion-spinner v-if="estimandoPeso" name="crescent" slot="start" />
             <ion-icon v-else :icon="sparklesOutline" slot="start" />
-            {{ estimandoPeso ? 'Estimando...' : 'Estimar peso con IA' }}
+            {{ estimandoPeso ? t('home.ganadero.estimating') : t('home.ganadero.estimateWithAI') }}
           </ion-button>
 
           <div v-if="resultadoML" class="ml-resultado">
-            <img v-if="fotoAnotada" :src="fotoAnotada" class="foto-anotada" alt="Animal detectado" />
+            <img v-if="fotoAnotada" :src="fotoAnotada" class="foto-anotada" :alt="t('home.ganadero.noAnimalDetected')" />
 
-            <div class="ml-peso">~{{ resultadoML.peso_estimado_kg }} kg estimados</div>
-            <div class="ml-rango">Rango: {{ resultadoML.rango_min_kg }} – {{ resultadoML.rango_max_kg }} kg · Confianza: {{ Math.round(resultadoML.confianza * 100) }}%</div>
+            <div class="ml-peso">{{ t('home.ganadero.estimatedWeight', { weight: resultadoML.peso_estimado_kg }) }}</div>
+            <div class="ml-rango">{{ t('home.ganadero.rangeConfidence', { min: resultadoML.rango_min_kg, max: resultadoML.rango_max_kg, confidence: Math.round(resultadoML.confianza * 100) }) }}</div>
 
             <div v-if="resultadoML.medidas && resultadoML.medidas.perimetro_toracico_cm > 0" class="ml-medidas">
               <div class="ml-medida-item">
-                <span class="ml-medida-label">Perímetro torácico</span>
+                <span class="ml-medida-label">{{ t('home.ganadero.chestGirth') }}</span>
                 <span class="ml-medida-valor">{{ resultadoML.medidas.perimetro_toracico_cm }} cm</span>
               </div>
               <div class="ml-medida-item">
-                <span class="ml-medida-label">Largo del cuerpo</span>
+                <span class="ml-medida-label">{{ t('home.ganadero.bodyLength') }}</span>
                 <span class="ml-medida-valor">{{ resultadoML.medidas.largo_cuerpo_cm }} cm</span>
               </div>
               <div class="ml-medida-item">
-                <span class="ml-medida-label">Altura</span>
+                <span class="ml-medida-label">{{ t('home.ganadero.height') }}</span>
                 <span class="ml-medida-valor">{{ resultadoML.medidas.altura_cm }} cm</span>
               </div>
             </div>
@@ -227,10 +228,10 @@
 
         <div v-if="resultadoML" class="modal-actions">
           <ion-button expand="block" fill="outline" @click="cerrarEstimador">
-            Solo estimar (no guardar)
+            {{ t('home.ganadero.estimateOnly') }}
           </ion-button>
           <ion-button expand="block" color="primary" @click="guardarComoAnimal">
-            Guardar como animal
+            {{ t('home.ganadero.saveAsAnimal') }}
           </ion-button>
         </div>
       </ion-content>
@@ -241,6 +242,7 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 import {
   IonPage, IonHeader, IonToolbar, IonTitle, IonContent,
   IonButtons, IonButton, IonIcon, IonBadge,
@@ -264,6 +266,7 @@ import { getPesajesRecientes, type RegistroPesoConGanado } from '@/api/reportes'
 const router = useRouter()
 const authStore = useAuthStore()
 const estimacionPendienteStore = useEstimacionPendienteStore()
+const { t, locale } = useI18n()
 
 const ganado = ref<Ganado[]>([])
 const fincas = ref<Finca[]>([])
@@ -301,7 +304,7 @@ function pesoEfectivo(reg: RegistroPesoConGanado): string {
 
 function formatFecha(fecha: string): string {
   const [y, m, d] = fecha.substring(0, 10).split('-').map(Number)
-  return new Date(y, m - 1, d).toLocaleDateString('es-CR', {
+  return new Date(y, m - 1, d).toLocaleDateString(locale.value === 'es-LA' ? 'es-CR' : 'en-US', {
     day: '2-digit', month: 'short', year: 'numeric',
   })
 }
@@ -351,11 +354,11 @@ async function tomarFotoDesde(source: CameraSource) {
 
 async function seleccionarFoto() {
   const sheet = await actionSheetController.create({
-    header: 'Foto del animal',
+    header: t('home.ganadero.photoLabel'),
     buttons: [
-      { text: 'Tomar foto', icon: cameraOutline, handler: () => { tomarFotoDesde(CameraSource.Camera) } },
-      { text: 'Elegir de galería', icon: imagesOutline, handler: () => { tomarFotoDesde(CameraSource.Photos) } },
-      { text: 'Cancelar', role: 'cancel' },
+      { text: t('home.ganadero.takePhotoOption'), icon: cameraOutline, handler: () => { tomarFotoDesde(CameraSource.Camera) } },
+      { text: t('home.ganadero.chooseFromGallery'), icon: imagesOutline, handler: () => { tomarFotoDesde(CameraSource.Photos) } },
+      { text: t('common.cancel'), role: 'cancel' },
     ],
   })
   await sheet.present()
@@ -366,8 +369,8 @@ async function estimarConIA() {
 
   if (!raza.value) {
     const alert = await alertController.create({
-      header: 'Selecciona la raza',
-      message: 'Para una mejor estimación, selecciona la raza del animal antes de estimar.',
+      header: t('home.ganadero.selectBreedTitle'),
+      message: t('home.ganadero.selectBreedMessage'),
       buttons: ['OK'],
     })
     await alert.present()
@@ -386,9 +389,9 @@ async function estimarConIA() {
     const msg =
       e?.response?.data?.sugerencia ??
       e?.response?.data?.error ??
-      'No se pudo estimar el peso. Asegúrese de que el animal sea visible de perfil y bien iluminado.'
+      t('home.ganadero.estimateErrorDefault')
     const alert = await alertController.create({
-      header: 'No se detectó el animal',
+      header: t('home.ganadero.noAnimalDetected'),
       message: msg,
       buttons: ['OK'],
     })
@@ -413,12 +416,12 @@ function guardarComoAnimal() {
 
 async function handleLogout() {
   const alert = await alertController.create({
-    header: 'Cerrar sesión',
-    message: '¿Estás seguro de que deseas salir?',
+    header: t('common.logoutConfirmTitle'),
+    message: t('common.logoutConfirmMessage'),
     buttons: [
-      { text: 'Cancelar', role: 'cancel' },
+      { text: t('common.cancel'), role: 'cancel' },
       {
-        text: 'Cerrar sesión',
+        text: t('common.logout'),
         role: 'destructive',
         handler: async () => {
           await authStore.logout()
