@@ -53,7 +53,7 @@ import { useI18n } from 'vue-i18n'
 const router = useRouter()
 const authStore = useAuthStore()
 const estimacionPendienteStore = useEstimacionPendienteStore()
-const { info } = useToast()
+const { info, error: toastError } = useToast()
 const { t } = useI18n()
 const canManageFincas = computed(() => !authStore.isVeterinario)
 
@@ -193,9 +193,11 @@ async function saveFinca() {
 
     await loadFincas()
 
-  } catch (error) {
+  } catch (error: any) {
 
     console.error(error)
+
+    toastError(error?.response?.data?.message ?? t('fincas.saveFarmErrorDefault'))
 
   }
 
@@ -231,9 +233,17 @@ async function eliminarFinca(id: number) {
 
             await loadFincas()
 
-          } catch (error) {
+          } catch (error: any) {
 
             console.error(error)
+
+            const status = error?.response?.status
+
+            const message = status === 400
+              ? t('fincas.deleteFarmHasAnimals')
+              : (error?.response?.data?.message ?? t('fincas.deleteFarmErrorDefault'))
+
+            toastError(message)
 
           }
 
@@ -510,6 +520,7 @@ onMounted(() => {
 
             <ion-input
               v-model="form.nombre"
+              :placeholder="t('fincas.namePlaceholder')"
             />
 
           </ion-item>
@@ -522,6 +533,7 @@ onMounted(() => {
 
             <ion-input
               v-model="form.ubicacion"
+              :placeholder="t('fincas.locationPlaceholder')"
             />
 
           </ion-item>
@@ -535,6 +547,7 @@ onMounted(() => {
             <ion-input
               type="number"
               v-model="form.area"
+              :placeholder="t('fincas.areaPlaceholder')"
             />
 
           </ion-item>
@@ -547,6 +560,7 @@ onMounted(() => {
 
             <ion-input
               v-model="form.numero_finca"
+              :placeholder="t('fincas.farmNumberPlaceholder')"
             />
 
           </ion-item>

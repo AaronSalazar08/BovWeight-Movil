@@ -262,8 +262,10 @@ import { useEstimacionPendienteStore } from '@/stores/estimacionPendiente'
 import { getTodoElGanado, type Ganado } from '@/api/ganado'
 import { getFincas, type Finca } from '@/api/fincas'
 import { getPesajesRecientes, type RegistroPesoConGanado } from '@/api/reportes'
+import { useToast } from '@/composables/useToast'
 
 const router = useRouter()
+const toast = useToast()
 const authStore = useAuthStore()
 const estimacionPendienteStore = useEstimacionPendienteStore()
 const { t, locale } = useI18n()
@@ -282,8 +284,9 @@ async function cargarDatos() {
     ganado.value = g
     fincas.value = f
     recientes.value = r
-  } catch (e) {
+  } catch (e: any) {
     console.error(e)
+    toast.error(e?.response?.data?.message ?? t('common.loadErrorToast'))
   }
 }
 

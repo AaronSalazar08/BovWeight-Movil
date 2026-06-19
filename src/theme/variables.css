@@ -148,26 +148,30 @@ ion-action-sheet,
   --button-background-activated: #eeeeee;
 }
 
-/* Partes internas accesibles vía cssClass (no son shadow DOM) */
-.bov-action-sheet .action-sheet-group {
+/* Partes internas accesibles por selector global (no son shadow DOM).
+   Se aplica a cualquier ion-action-sheet, sin requerir cssClass, porque
+   varias pantallas (cámara/galería, exportar, editar/eliminar) crean el
+   action sheet sin pasar 'bov-action-sheet' y quedaban con texto blanco
+   sobre fondo blanco en modo oscuro. */
+ion-action-sheet .action-sheet-group {
   background: #ffffff !important;
 }
 
-.bov-action-sheet .action-sheet-title {
+ion-action-sheet .action-sheet-title {
   color: #555555 !important;
   font-size: 14px;
 }
 
-.bov-action-sheet .action-sheet-button {
+ion-action-sheet .action-sheet-button {
   color: #1a1a1a !important;
   background: #ffffff !important;
 }
 
-.bov-action-sheet .action-sheet-button.action-sheet-destructive {
+ion-action-sheet .action-sheet-button.action-sheet-destructive {
   color: #eb445a !important;
 }
 
-.bov-action-sheet .action-sheet-button.action-sheet-cancel {
+ion-action-sheet .action-sheet-button.action-sheet-cancel {
   color: #555555 !important;
   font-weight: 600;
 }
@@ -179,21 +183,24 @@ ion-alert,
   --color: #1a1a1a;
 }
 
-.bov-alert .alert-wrapper {
+/* Sin requerir cssClass: la mayoría de los alertController.create() del
+   app (confirmaciones, errores) no pasan 'bov-alert' y quedaban con texto
+   blanco sobre fondo blanco en modo oscuro. */
+ion-alert .alert-wrapper {
   background: #ffffff !important;
 }
 
-.bov-alert .alert-head .alert-title,
-.bov-alert .alert-message {
+ion-alert .alert-head .alert-title,
+ion-alert .alert-message {
   color: #1a1a1a !important;
 }
 
-.bov-alert .alert-button {
+ion-alert .alert-button {
   color: var(--ion-color-primary, #008080) !important;
 }
 
-.bov-alert .alert-button.ion-color-danger,
-.bov-alert .alert-button[class*="danger"] {
+ion-alert .alert-button.ion-color-danger,
+ion-alert .alert-button[class*="danger"] {
   color: #eb445a !important;
 }
 
