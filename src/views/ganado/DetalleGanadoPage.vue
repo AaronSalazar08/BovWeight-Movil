@@ -72,11 +72,17 @@ const fotoAnotada = ref<string | null>(null)
 const estimandoPeso = ref(false)
 const resultadoML = ref<MLEstimacion | null>(null)
 
-const RAZAS = ['Holstein', 'Angus', 'Jersey', 'Hereford', 'Brahman', 'Simmental', 'Cebuíno', 'Criollo']
+const RAZAS = ['Brahman', 'Cebuíno', 'Criollo', 'Holstein', 'Angus', 'Jersey', 'Hereford', 'Simmental', 'Otra (Genérica)']
 const RAZA_TO_BREED: Record<string, string> = {
   Brahman: 'brahman',
   Cebuíno: 'cebu',
   Criollo: 'criollo',
+  Holstein: 'holstein',
+  Angus: 'angus',
+  Jersey: 'jersey',
+  Hereford: 'hereford',
+  Simmental: 'simmental',
+  'Otra (Genérica)': 'default',
 }
 const SEXOS: Array<'Macho' | 'Hembra'> = ['Macho', 'Hembra']
 

@@ -106,9 +106,15 @@ const RAZA_TO_BREED: Record<string, string> = {
   Brahman: 'brahman',
   Cebuíno: 'cebu',
   Criollo: 'criollo',
+  Holstein: 'holstein',
+  Angus: 'angus',
+  Jersey: 'jersey',
+  Hereford: 'hereford',
+  Simmental: 'simmental',
+  'Otra (Genérica)': 'default',
 }
 
-const RAZAS = ['Holstein', 'Angus', 'Jersey', 'Hereford', 'Brahman', 'Simmental', 'Cebuíno', 'Criollo']
+const RAZAS = ['Brahman', 'Cebuíno', 'Criollo', 'Holstein', 'Angus', 'Jersey', 'Hereford', 'Simmental', 'Otra (Genérica)']
 
 const filtrados = computed(() =>
   animales.value.filter((a) => {
